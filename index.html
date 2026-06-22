@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v19</title>
+    <title>지식시장 수행평가 종합 시스템 v20</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -58,12 +58,15 @@
         .admin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
         .modal-body { background: #fff; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: center; }
 
-        .admin-container { max-width: 1200px; display: none; background: #ffffff; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
+        .admin-container { max-width: 1400px; display: none; background: #ffffff; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); margin: 20px auto; }
         .table-wrapper { overflow-x: auto; margin-bottom: 15px; background: #fff; border-radius: 8px; border: 1px solid var(--border-color); }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 720px; }
-        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 1200px; }
+        th, td { border: 1px solid var(--border-color); padding: 8px 6px; text-align: center; }
         th { background-color: #f1f5f9; color:#4a5568; }
         
+        .score-input-box { width: 45px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; }
+        .total-score-text { font-weight: bold; color: #2c5282; font-size: 0.95rem; }
+
         .class-section { border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-top: 10px; margin-bottom: 15px; background: #fff; }
         .toggle-panel { display: flex; flex-wrap: wrap; gap: 15px; background: #edf2f7; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
 
@@ -146,7 +149,7 @@
 
         <div id="pageSeller" class="page">
             <h2>1. 판매자 평가 (구매자 태도)</h2>
-            <div class="info-text">💡 우리 부스에 방문한 구매자들의 태도를 평가해 주세요. <br><span style="color:red; font-weight:bold;">※ 이름은 반드시 성을 붙여 전체 이름을 정확하게 적어주세요. <br>※ 퀴즈를 낸 사람이 아니라, 우리 부스에 와서 설명을 들은 친구들만 평가 대상입니다.</span></div>
+            <div class="info-text">💡 우리 부스에 방문한 구매자들의 태도를 평가해 주세요.</div>
             <form id="sellerForm" onsubmit="submitSellerEval(event)">
                 <div class="form-group" style="width:200px;">
                     <label>⏱️ 현재 활동 회차</label>
@@ -167,7 +170,7 @@
                 </div>
                 <div class="eval-student-card">
                     <label style="color:#718096;">👤 방문 구매자 2 (선택)</label>
-                    <input type="text" id="buyerName2" placeholder="성명 입력 (없으면 공란)">
+                    <input type="text" id="buyerName2" placeholder="성명 입력">
                     <div class="radio-options">
                         <label class="radio-label"><input type="radio" name="buyerAttitude2" value="매우 부족">매우 부족</label>
                         <label class="radio-label"><input type="radio" name="buyerAttitude2" value="부족">부족</label>
@@ -178,7 +181,7 @@
                 </div>
                 <div class="eval-student-card">
                     <label style="color:#718096;">👤 방문 구매자 3 (선택)</label>
-                    <input type="text" id="buyerName3" placeholder="성명 입력 (없으면 공란)">
+                    <input type="text" id="buyerName3" placeholder="성명 입력">
                     <div class="radio-options">
                         <label class="radio-label"><input type="radio" name="buyerAttitude3" value="매우 부족">매우 부족</label>
                         <label class="radio-label"><input type="radio" name="buyerAttitude3" value="부족">부족</label>
@@ -194,7 +197,7 @@
 
         <div id="pageBuyer" class="page">
             <h2>2. 구매자 평가 (판매자 발표)</h2>
-            <div class="info-text">💡 내가 방문한 탐구 부스의 설명자들을 평가해 주세요. <br><span style="color:red; font-weight:bold;">※ 이름은 반드시 성을 붙여 전체 이름을 정확하게 적어주세요. <br>※ 퀴즈를 낸 사람이 아니라, 부스에서 나에게 직접 '설명 발표'를 한 친구들만 평가 대상입니다.</span></div>
+            <div class="info-text">💡 내가 방문한 탐구 부스의 설명자들을 평가해 주세요.</div>
             <form id="buyerForm" onsubmit="submitBuyerEval(event)">
                 <div class="form-group" style="width:230px;">
                     <label>⛺ 방문 부스 조 선택</label>
@@ -216,7 +219,7 @@
                 </div>
                 <div class="eval-student-card">
                     <label style="color:#718096;">👤 판매자(설명자) 2 (선택)</label>
-                    <input type="text" id="sellerName2" placeholder="설명 학생 성명 입력 (없으면 공란)">
+                    <input type="text" id="sellerName2" placeholder="설명 학생 성명 입력">
                     <div class="radio-options">
                         <label class="radio-label"><input type="radio" name="sellerScore2" value="매우 못함">매우 못함</label>
                         <label class="radio-label"><input type="radio" name="sellerScore2" value="못함">못함</label>
@@ -227,7 +230,7 @@
                 </div>
                 <div class="eval-student-card">
                     <label style="color:#718096;">👤 판매자(설명자) 3 (선택)</label>
-                    <input type="text" id="sellerName3" placeholder="설명 학생 성명 입력 (없으면 공란)">
+                    <input type="text" id="sellerName3" placeholder="설명 학생 성명 입력">
                     <div class="radio-options">
                         <label class="radio-label"><input type="radio" name="sellerScore3" value="매우 못함">매우 못함</label>
                         <label class="radio-label"><input type="radio" name="sellerScore3" value="못함">못함</label>
@@ -241,15 +244,12 @@
             <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
         </div>
 
-        <!-- [세부메뉴 3] 동료 상호평가 (required 사유 지정 완료) -->
         <div id="pageTeam" class="page">
             <h2>3. 조원(동료) 평가</h2>
-            <div class="info-text">💡 같은 조에서 함께 고생한 조원들의 활동 참여도를 상호 평가해 주세요. <br><span style="color:red; font-weight:bold;">※ 이름은 반드시 성을 붙여 전체 이름을 정확하게 적어주세요.</span></div>
             <form id="teamForm" onsubmit="submitTeamEval(event)">
                 <div class="eval-student-card">
                     <label>👤 평가 대상 조원 이름</label>
-                    <input type="text" id="teamTargetName" required placeholder="조원 성명 전체 입력 (예: 홍길동)">
-                    
+                    <input type="text" id="teamTargetName" required placeholder="조원 성명 전체 입력">
                     <label style="margin-top:12px;">📊 협력 및 참여 기여도 (5단계)</label>
                     <div class="radio-options">
                         <label class="radio-label"><input type="radio" name="teamScore" value="매우 미흡">매우 미흡</label>
@@ -258,19 +258,16 @@
                         <label class="radio-label"><input type="radio" name="teamScore" value="우수">우수</label>
                         <label class="radio-label"><input type="radio" name="teamScore" value="매우 우수">매우 우수</label>
                     </div>
-                    
-                    <label style="margin-top:12px; color: #c53030; font-weight: bold;">✍️ 그렇게 평가한 구체적인 사유 (필수)</label>
-                    <textarea id="teamReason" required placeholder="조원이 기여한 점이나 활동 참여 태도를 구체적으로 작성하세요. 비워두면 제출되지 않습니다."></textarea>
+                    <label style="margin-top:12px; color: #c53030;">✍️ 그렇게 평가한 구체적인 사유 (필수)</label>
+                    <textarea id="teamReason" required placeholder="비워두면 제출되지 않습니다."></textarea>
                 </div>
                 <button type="submit" class="btn-block btn-submit">동료 평가 제출</button>
             </form>
             <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
         </div>
 
-        <!-- [세부메뉴 4] 자기성찰 보고창 (required 사유 지정 완료) -->
         <div id="pageSelf" class="page">
             <h2>4. 나의 성찰 자기 평가</h2>
-            <div class="info-text">💡 지식시장 부스 운영 및 참여 활동 과정에서 자기 자신을 정직하게 성찰해 봅니다.</div>
             <form id="selfForm" onsubmit="submitSelfEval(event)">
                 <div class="eval-student-card">
                     <label>📊 본인의 프로젝트 참여 총평 (5단계)</label>
@@ -281,9 +278,8 @@
                         <label class="radio-label"><input type="radio" name="selfScore" value="우수">우수</label>
                         <label class="radio-label"><input type="radio" name="selfScore" value="매우 우수">매우 우수</label>
                     </div>
-                    
-                    <label style="margin-top:12px; color: #c53030; font-weight: bold;">✍️ 스스로 배우고 성장한 점 및 반성할 점 (필수)</label>
-                    <textarea id="selfReason" required placeholder="내가 수행한 역할과 참여 수준에 대한 성찰 사유를 구체적으로 작성하세요. 비워두면 제출되지 않습니다."></textarea>
+                    <label style="margin-top:12px; color: #c53030;">✍️ 스스로 배우고 성장한 점 및 반성할 점 (필수)</label>
+                    <textarea id="selfReason" required placeholder="비워두면 제출되지 않습니다."></textarea>
                 </div>
                 <button type="submit" class="btn-block btn-submit">자기 평가 제출</button>
             </form>
@@ -318,7 +314,7 @@
             <label><input type="checkbox" id="toggle_score" checked onchange="updateMenuControl()"> 5. 성적확인 서랍 오픈</label>
         </div>
 
-        <h3>👥 가입된 학생 명부 및 수행 채점 (실시간 반영)
+        <h3>👥 가입된 학생 명부 및 세부 채점 (40점 만점 자동 합산 엔진)
             <button class="btn-toggle-view" onclick="toggleSection('sec_accounts')">접기/펼치기</button>
         </h3>
         <div id="sec_accounts" class="section-content">
@@ -334,24 +330,28 @@
             <div class="table-wrapper">
                 <table>
                     <thead>
-                        <tr><th>소속반</th><th>번호</th><th>성명</th><th>지정 암호</th><th>수행 점수</th><th>종합 피드백 입력</th><th>조작</th></tr>
+                        <tr>
+                            <th>학번/성명</th><th>지정 암호</th>
+                            <th>자료(9)</th><th>질문(2)</th><th>판매(4)</th><th>구매(6)</th><th>성찰(2)</th><th>동료(5)</th><th>기본</th>
+                            <th>총점(40)</th><th>종합 피드백 입력</th><th>조작</th>
+                        </tr>
                     </thead>
                     <tbody id="adminUserAccountTable"></tbody>
                 </table>
             </div>
         </div>
 
-        <h3>📊 1. 구매자 태도 분석 리포트
+        <h3>📊 1. 구매자 태도 분석 리포트 (교사용 평균 환산 포함)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report1')">접기/펼치기</button>
         </h3>
         <div id="sec_report1" class="section-content"><div id="groupedSellerView"></div></div>
 
-        <h3>📊 2. 판매자 발표 분석 리포트
+        <h3>📊 2. 판매자 발표 분석 리포트 (교사용 평균 환산 포함)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report2')">접기/펼치기</button>
         </h3>
         <div id="sec_report2" class="section-content"><div id="groupedBuyerView"></div></div>
 
-        <h3>📊 3. 조원 동료 상호 평가 사유 리포트
+        <h3>📊 3. 조원 동료 상호 평가 사유 리포트 (교사용 평균 환산 포함)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report3')">접기/펼치기</button>
         </h3>
         <div id="sec_report3" class="section-content"><div id="groupedTeamView"></div></div>
@@ -363,7 +363,7 @@
             <div class="table-wrapper">
                 <table>
                     <thead>
-                        <tr><th>소속반</th><th>학번 번호</th><th>학생 성명</th><th>성찰단계</th><th>자기성찰 내용</th><th>시간</th></tr>
+                        <tr><th>소속반</th><th>학생 성명</th><th>성찰단계</th><th>자기성찰 내용</th><th>시간</th></tr>
                     </thead>
                     <tbody id="flatSelfTableBody"></tbody>
                 </table>
@@ -374,7 +374,7 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT STABLE ENGINE v19
+                        JAVASCRIPT STABLE ENGINE v20
          ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-XLXvw1WfxRx2byj3Y0TEBN_672_oMcnkl7zydTdvF5ZXWnYBTaI4EYi-xLTPHyZATg/exec";
@@ -382,8 +382,14 @@
         var currentSessionUser = null;
         var menuPermissions = { seller: true, buyer: true, team: true, self: true, score: true };
         var globalCloudDatabase = { accounts: [], seller: [], buyer: [], team: [], self: [] };
-
         var activeAccountClass = 1;
+
+        // 평정 문자열 점수 치환 테이블 (1~5점 환산용)
+        var scoreMap = {
+            "매우 우수": 5, "우수": 4, "보통": 3, "미흡": 2, "매우 미흡": 1,
+            "매우 잘함": 5, "잘함": 4, "보통": 3, "못함": 2, "매우 못함": 1,
+            "매우 부족": 1, "부족": 2 
+        };
 
         window.onload = function() { switchPage('pageLogin'); };
 
@@ -470,7 +476,7 @@
                 .then(function(res) { return res.json(); })
                 .then(function(cloudData) {
                     var accs = cloudData.accounts || [];
-                    var isDuplicate学번 = false;
+                    var isDuplicate학번 = false;
                     var isMatchedExistUser = false;
 
                     for(var i=0; i<accs.length; i++) {
@@ -493,7 +499,6 @@
                     }
 
                     currentSessionUser = { classNum: parseInt(cls), number: parseInt(num), name: name };
-                    
                     if(!isMatchedExistUser) {
                         sendToGoogleDatabase('accounts', [parseInt(cls), parseInt(num), name, pw, '', '']);
                     }
@@ -531,7 +536,6 @@
 
         function enterMenu(menuType) {
             if(!menuPermissions[menuType]) { alert('선생님이 아직 비활성화해 두신 메뉴입니다.'); return; }
-            
             if(menuType === 'seller') document.getElementById('sellerForm').reset();
             if(menuType === 'buyer') document.getElementById('buyerForm').reset();
             if(menuType === 'team') document.getElementById('teamForm').reset();
@@ -552,7 +556,6 @@
             event.preventDefault();
             var round = document.getElementById('sellerRound').value;
             var hasSubmitted = false;
-
             for(var i=1; i<=3; i++) {
                 var name = document.getElementById("buyerName" + i).value.trim();
                 if(name) {
@@ -561,7 +564,7 @@
                     hasSubmitted = true;
                 }
             }
-            if(hasSubmitted) alert('구매자 평가 데이터가 구글 데이터베이스에 정상 누적되었습니다.');
+            if(hasSubmitted) alert('구매자 평가가 안전하게 제출되었습니다.');
             exitSubPage();
         }
 
@@ -569,7 +572,6 @@
             event.preventDefault();
             var booth = document.getElementById('buyerBooth').value;
             var hasSubmitted = false;
-
             for(var i=1; i<=3; i++) {
                 var name = document.getElementById("sellerName" + i).value.trim();
                 if(name) {
@@ -578,7 +580,7 @@
                     hasSubmitted = true;
                 }
             }
-            if(hasSubmitted) alert('판매자 발표 평가 데이터가 구글 데이터베이스에 정상 누적되었습니다.');
+            if(hasSubmitted) alert('판매자 발표 평가가 안전하게 제출되었습니다.');
             exitSubPage();
         }
 
@@ -587,7 +589,7 @@
             var target = document.getElementById('teamTargetName').value.trim();
             var score = document.querySelector("input[name='teamScore']:checked").value;
             var reason = document.getElementById('teamReason').value.trim();
-            sendToGoogleDatabase('team', [currentSessionUser.classNum, currentSessionUser.name, target, score, reason, new Date().toLocaleTimeString()]);
+            sendToGoogleDatabase('team', [currentSessionUser.classNum, "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name, target, score, reason, new Date().toLocaleTimeString()]);
             alert('동료 평가가 정상 제출되었습니다!'); exitSubPage();
         }
 
@@ -599,10 +601,35 @@
             alert('자기 성찰 평가가 정상 제출되었습니다!'); exitSubPage();
         }
 
+        // 🧮 [v20 핵심 변경] 입력값 실시간 변동 감지 및 자동 합산 (40점 만점 구조)
+        function calculateLiveTotal(key) {
+            var m1 = parseFloat(document.getElementById("sc_mat_" + key).value) || 0;
+            var m2 = parseFloat(document.getElementById("sc_que_" + key).value) || 0;
+            var m3 = parseFloat(document.getElementById("sc_sel_" + key).value) || 0;
+            var m4 = parseFloat(document.getElementById("sc_buy_" + key).value) || 0;
+            var m5 = parseFloat(document.getElementById("sc_slf_" + key).value) || 0;
+            var m6 = parseFloat(document.getElementById("sc_tem_" + key).value) || 0;
+            var base = 14; // 기본점수 14점
+            
+            var total = m1 + m2 + m3 + m4 + m5 + m6 + base;
+            document.getElementById("sc_total_" + key).innerText = total + "점";
+        }
+
+        // 💾 구글 시트 저장 파이프라인 (세부 항목 구조 문자열 압축 저장 -> 꺼내서 역조합)
         function saveStudentScore(key, classNum, num) {
-            var scoreVal = document.getElementById("score_input_" + key).value;
-            var feedbackVal = document.getElementById("feedback_input_" + key).value;
-            var payload = { type: 'scores_sync', data: [classNum, num, '', scoreVal, feedbackVal] };
+            var m1 = document.getElementById("sc_mat_" + key).value || '0';
+            var m2 = document.getElementById("sc_que_" + key).value || '0';
+            var m3 = document.getElementById("sc_sel_" + key).value || '0';
+            var m4 = document.getElementById("sc_buy_" + key).value || '0';
+            var m5 = document.getElementById("sc_slf_" + key).value || '0';
+            var m6 = document.getElementById("sc_tem_" + key).value || '0';
+            var totalText = document.getElementById("sc_total_" + key).innerText.replace("점", "");
+            
+            var rawFeedback = document.getElementById("feedback_input_" + key).value;
+            // 피드백 데이터의 확장 융합화 저장
+            var structuredScoreString = "[" + m1 + "/" + m2 + "/" + m3 + "/" + m4 + "/" + m5 + "/" + m6 + "]";
+            
+            var payload = { type: 'scores_sync', data: [classNum, num, '', totalText, structuredScoreString + " " + rawFeedback] };
             
             fetch(WEB_APP_URL, {
                 method: "POST",
@@ -610,22 +637,27 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             }).then(function(){
-                alert('수행 평가 점수와 피드백이 실시간으로 안전하게 반영되었습니다.');
+                alert('세부 합산 점수 및 피드백이 실시간 저장 완료되었습니다.');
                 fetchAllDataFromGoogle(); 
             });
         }
 
+        // 🧠 모드별 데이터 파싱 (1: seller, 2: buyer, 3: team)
         function processGroupingForClass(records, targetClass, mode) {
             var groups = {};
             for(var i=0; i<records.length; i++) {
                 var r = records[i];
-                var evalText = r[1] ? r[1].toString() : (r[2] ? r[2].toString() : ""); 
+                var evalText = "";
+                if(mode === 1 || mode === 2 || mode === 3) {
+                    evalText = r[2] ? r[2].toString() : (r[1] ? r[1].toString() : "");
+                }
                 var rawClass = evalText.match(/\d+반/);
                 var itemClass = rawClass ? parseInt(rawClass[0]) : 0;
                 
                 if(itemClass === 0 && !isNaN(r[1])) { itemClass = parseInt(r[1]); }
                 if(itemClass !== parseInt(targetClass)) continue;
                 
+                // 대상자 이름 추출 인덱스 교정 (mode 1: r[3], mode 2: r[2], mode 3: r[2])
                 var targetName = (mode === 1) ? (r[3] || "미정") : (r[2] || "미정");
                 if(!groups[targetName]) groups[targetName] = [];
                 groups[targetName].push(r);
@@ -638,24 +670,67 @@
             accountTbody.innerHTML = '';
             var hasAccount = false;
             
+            // 미리 판매자, 구매자, 동료 평가 점수 평균 가공
+            var stats = { seller: {}, buyer: {}, team: {} };
+            
+            globalCloudDatabase.seller.forEach(function(r){
+                var name = r[3]; if(!name) return;
+                if(!stats.seller[name]) stats.seller[name] = [];
+                if(scoreMap[r[4]]) stats.seller[name].push(scoreMap[r[4]]);
+            });
+            globalCloudDatabase.buyer.forEach(function(r){
+                var name = r[2]; if(!name) return;
+                if(!stats.buyer[name]) stats.buyer[name] = [];
+                if(scoreMap[r[3]]) stats.buyer[name].push(scoreMap[r[3]]);
+            });
+            globalCloudDatabase.team.forEach(function(r){
+                var name = r[2]; if(!name) return;
+                if(!stats.team[name]) stats.team[name] = [];
+                if(scoreMap[r[3]]) stats.team[name].push(scoreMap[r[3]]);
+            });
+
             var accs = globalCloudDatabase.accounts;
             for(var i=0; i<accs.length; i++) {
                 var u = accs[i]; 
                 if(parseInt(u[0]) !== activeAccountClass) continue;
                 hasAccount = true;
                 var uniqueKey = u[0] + "_" + u[1];
+                
+                // 기존 저장된 다중 평가 세부 항목 복원 파싱
+                var cellValues = ["0","0","0","0","0","0"];
+                var cleanFeedback = u[5] || "";
+                if(cleanFeedback.indexOf("[") === 0 && cleanFeedback.indexOf("]") > 0) {
+                    var closeIdx = cleanFeedback.indexOf("]");
+                    var corePart = cleanFeedback.substring(1, closeIdx);
+                    cellValues = corePart.split("/");
+                    cleanFeedback = cleanFeedback.substring(closeIdx + 1).trim();
+                } else if(u[4]) {
+                    cellValues[0] = u[4]; // 예외 백업
+                }
+
+                var baseScore = 14;
+                var loadedTotal = parseFloat(u[4]) || (parseFloat(cellValues[0])+parseFloat(cellValues[1])+parseFloat(cellValues[2])+parseFloat(cellValues[3])+parseFloat(cellValues[4])+parseFloat(cellValues[5])+baseScore);
+
                 accountTbody.innerHTML += '<tr>' +
-                    '<td>1학년 ' + u[0] + '반</td><td>' + u[1] + '번</td><td><strong>' + u[2] + '</strong></td><td style="color:#4c51bf;">' + u[3] + '</td>' +
-                    '<td><input type="text" style="width:65px; text-align:center;" id="score_input_' + uniqueKey + '" value="' + (u[4]||'') + '" placeholder="점수"></td>' +
-                    '<td><input type="text" id="feedback_input_' + uniqueKey + '" value="' + (u[5]||'') + '" placeholder="피드백 입력"></td>' +
+                    '<td><strong>' + u[1] + '번 ' + u[2] + '</strong></td>' +
+                    '<td style="color:#94a3b8;">' + u[3] + '</td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_mat_' + uniqueKey + '" value="' + cellValues[0] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_que_' + uniqueKey + '" value="' + cellValues[1] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_sel_' + uniqueKey + '" value="' + cellValues[2] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_buy_' + uniqueKey + '" value="' + cellValues[3] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_slf_' + uniqueKey + '" value="' + cellValues[4] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_tem_' + uniqueKey + '" value="' + cellValues[5] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td style="color:#aaa;">' + baseScore + '</td>' +
+                    '<td><span class="total-score-text" id="sc_total_' + uniqueKey + '">' + loadedTotal + '점</span></td>' +
+                    '<td><input type="text" style="width:180px;" id="feedback_input_' + uniqueKey + '" value="' + cleanFeedback + '" placeholder="코멘트 피드백 입력"></td>' +
                     '<td><button class="btn-sm" style="background:var(--mint-color);" onclick="saveStudentScore(\'' + uniqueKey + '\',' + u[0] + ',' + u[1] + ')">반영</button></td>' +
                 '</tr>';
             }
-            if(!hasAccount) accountTbody.innerHTML = '<tr><td colspan="7" style="color:#aaa;">가입 명부가 비어 있습니다.</td></tr>';
+            if(!hasAccount) accountTbody.innerHTML = '<tr><td colspan="12" style="color:#aaa; padding:20px;">가입 명부가 비어 있습니다.</td></tr>';
 
-            renderCloudGroupedView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, 1);
-            renderCloudGroupedView('groupedBuyerView', globalCloudDatabase.buyer, activeAccountClass, 2);
-            renderCloudGroupedView('groupedTeamView', globalCloudDatabase.team, activeAccountClass, 3);
+            renderCloudGroupedView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, 1, stats.seller);
+            renderCloudGroupedView('groupedBuyerView', globalCloudDatabase.buyer, activeAccountClass, 2, stats.buyer);
+            renderCloudGroupedView('groupedTeamView', globalCloudDatabase.team, activeAccountClass, 3, stats.team);
 
             var selfTbody = document.getElementById('flatSelfTableBody');
             selfTbody.innerHTML = '';
@@ -663,11 +738,12 @@
             for(var j=0; j<selves.length; j++) {
                 var s = selves[j];
                 if(parseInt(s[0]) !== activeAccountClass) continue;
-                selfTbody.innerHTML += '<tr><td>1학년 ' + s[0] + '반</td><td>-</td><td><strong>' + s[2] + '</strong></td><td>' + s[3] + '</td><td style="text-align:left;">' + s[4] + '</td><td style="color:#aaa;">' + s[5] + '</td></tr>';
+                selfTbody.innerHTML += '<tr><td>' + s[0] + '반</td><td><strong>' + s[2] + '</strong></td><td>' + s[3] + '</td><td style="text-align:left;">' + s[4] + '</td><td style="color:#aaa;">' + s[5] + '</td></tr>';
             }
         }
 
-        function renderCloudGroupedView(viewId, records, classNum, mode) {
+        // 📊 교사용 실시간 통계 수치 시각화 화면단 결합 생성 규칙
+        function renderCloudGroupedView(viewId, records, classNum, mode, statObj) {
             var container = document.getElementById(viewId);
             container.innerHTML = '';
             var grouped = processGroupingForClass(records, classNum, mode);
@@ -676,21 +752,29 @@
             for(var targetName in grouped) {
                 hasData = true;
                 var list = grouped[targetName];
+                var rawArr = statObj[targetName] || [];
+                var avgText = "평가 기록 없음";
+                if(rawArr.length > 0) {
+                    var sum = rawArr.reduce(function(a, b){ return a + b; }, 0);
+                    avgText = "⭐ 상호 평정 5점 만점 환산 평균: [ " + (sum / rawArr.length).toFixed(2) + " 점 ] / 참여횟수: " + rawArr.length + "회";
+                }
+
                 var html = '<div class="class-section" style="border-left: 5px solid var(--secondary-color);">' +
-                           '<p style="font-weight:bold; margin-bottom:6px;">🎯 대상자 성명: [ ' + targetName + ' ] 학생 평정</p>' +
+                           '<p style="font-weight:bold; margin-bottom:4px; color:#2c5282;">🎯 피평가 대상자 학생: [ ' + targetName + ' ]</p>' +
+                           '<p style="font-size:0.85rem; color:#4a5568; font-weight:bold; margin-bottom:8px; background:#edf2f7; padding:6px; border-radius:4px;">' + avgText + '</p>' +
                            '<div class="table-wrapper"><table><tbody>';
                 for(var k=0; k<list.length; k++) {
                     var item = list[k];
                     html += '<tr>';
-                    if(mode === 1) html += '<td>' + item[0] + '</td><td>' + item[2] + '</td><td><strong>' + item[4] + '</strong></td><td>' + item[5] + '</td>';
-                    else if(mode === 2) html += '<td>' + item[0] + '</td><td>' + item[1] + '</td><td><strong>' + item[3] + '</strong></td><td>' + item[4] + '</td>';
-                    else if(mode === 3) html += '<td>' + item[1] + '</td><td><strong>' + item[3] + '</strong></td><td style="text-align:left;">' + item[4] + '</td><td>' + item[5] + '</td>';
+                    if(mode === 1) html += '<td style="width:10%;">포지션: 판매자</td><td style="width:15%;">' + item[0] + '</td><td>평가한 구매자: ' + item[2] + '</td><td style="font-weight:bold; color:magenta;">태도평정: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
+                    else if(mode === 2) html += '<td style="width:10%;">포지션: 구매자</td><td style="width:15%;">' + item[0] + '</td><td>평가한 판매자: ' + item[1] + '</td><td style="font-weight:bold; color:purple;">발표평정: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
+                    else if(mode === 3) html += '<td style="width:15%;">동료 상호평가</td><td>평가한 조원: ' + item[1] + '</td><td style="font-weight:bold; color:blue;">기여도평정: ' + item[3] + '</td><td style="text-align:left; background:#fffaf0;">✍️ 서술사유: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
                     html += '</tr>';
                 }
                 html += '</tbody></table></div></div>';
                 container.innerHTML += html;
             }
-            if(!hasData) container.innerHTML = '<p style="color:#aaa; text-align:center;">데이터가 비어 있습니다.</p>';
+            if(!hasData) container.innerHTML = '<p style="color:#aaa; text-align:center; padding:15px;">해당 반의 데이터가 비어 있습니다.</p>';
         }
 
         function toggleSection(id) { var el = document.getElementById(id); if(el) el.classList.toggle('collapsed'); }
