@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v20</title>
+    <title>지식시장 수행평가 종합 시스템 v21</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -54,9 +54,6 @@
 
         .radio-options { display: flex; justify-content: space-between; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 6px; margin-bottom: 10px; }
         .radio-label { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; cursor: pointer; }
-
-        .admin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
-        .modal-body { background: #fff; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: center; }
 
         .admin-container { max-width: 1400px; display: none; background: #ffffff; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); margin: 20px auto; }
         .table-wrapper { overflow-x: auto; margin-bottom: 15px; background: #fff; border-radius: 8px; border: 1px solid var(--border-color); }
@@ -374,17 +371,16 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT STABLE ENGINE v20
+                        JAVASCRIPT CORE ENGINE v21
          ============================================================= -->
     <script>
-        var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-XLXvw1WfxRx2byj3Y0TEBN_672_oMcnkl7zydTdvF5ZXWnYBTaI4EYi-xLTPHyZATg/exec";
+        var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz4hyf4LyyFGPPwr5Qv9otBDK0V2KbmjsM2BaPtxC0EG1PPky_UzUQO8bUd8gNSzpFQbw/exec";
 
         var currentSessionUser = null;
         var menuPermissions = { seller: true, buyer: true, team: true, self: true, score: true };
         var globalCloudDatabase = { accounts: [], seller: [], buyer: [], team: [], self: [] };
         var activeAccountClass = 1;
 
-        // 평정 문자열 점수 치환 테이블 (1~5점 환산용)
         var scoreMap = {
             "매우 우수": 5, "우수": 4, "보통": 3, "미흡": 2, "매우 미흡": 1,
             "매우 잘함": 5, "잘함": 4, "보통": 3, "못함": 2, "매우 못함": 1,
@@ -476,7 +472,7 @@
                 .then(function(res) { return res.json(); })
                 .then(function(cloudData) {
                     var accs = cloudData.accounts || [];
-                    var isDuplicate학번 = false;
+                    var isDuplicate学번 = false;
                     var isMatchedExistUser = false;
 
                     for(var i=0; i<accs.length; i++) {
@@ -601,7 +597,6 @@
             alert('자기 성찰 평가가 정상 제출되었습니다!'); exitSubPage();
         }
 
-        // 🧮 [v20 핵심 변경] 입력값 실시간 변동 감지 및 자동 합산 (40점 만점 구조)
         function calculateLiveTotal(key) {
             var m1 = parseFloat(document.getElementById("sc_mat_" + key).value) || 0;
             var m2 = parseFloat(document.getElementById("sc_que_" + key).value) || 0;
@@ -609,13 +604,12 @@
             var m4 = parseFloat(document.getElementById("sc_buy_" + key).value) || 0;
             var m5 = parseFloat(document.getElementById("sc_slf_" + key).value) || 0;
             var m6 = parseFloat(document.getElementById("sc_tem_" + key).value) || 0;
-            var base = 14; // 기본점수 14점
+            var base = 14; 
             
             var total = m1 + m2 + m3 + m4 + m5 + m6 + base;
             document.getElementById("sc_total_" + key).innerText = total + "점";
         }
 
-        // 💾 구글 시트 저장 파이프라인 (세부 항목 구조 문자열 압축 저장 -> 꺼내서 역조합)
         function saveStudentScore(key, classNum, num) {
             var m1 = document.getElementById("sc_mat_" + key).value || '0';
             var m2 = document.getElementById("sc_que_" + key).value || '0';
@@ -626,7 +620,6 @@
             var totalText = document.getElementById("sc_total_" + key).innerText.replace("점", "");
             
             var rawFeedback = document.getElementById("feedback_input_" + key).value;
-            // 피드백 데이터의 확장 융합화 저장
             var structuredScoreString = "[" + m1 + "/" + m2 + "/" + m3 + "/" + m4 + "/" + m5 + "/" + m6 + "]";
             
             var payload = { type: 'scores_sync', data: [classNum, num, '', totalText, structuredScoreString + " " + rawFeedback] };
@@ -642,23 +635,24 @@
             });
         }
 
-        // 🧠 모드별 데이터 파싱 (1: seller, 2: buyer, 3: team)
+        // 🧠 [v21 핵심 수정] 유연한 유효반 추출 정규식 필터 탑재 (증발 버그 완전 진압)
         function processGroupingForClass(records, targetClass, mode) {
             var groups = {};
             for(var i=0; i<records.length; i++) {
                 var r = records[i];
-                var evalText = "";
-                if(mode === 1 || mode === 2 || mode === 3) {
-                    evalText = r[2] ? r[2].toString() : (r[1] ? r[1].toString() : "");
-                }
-                var rawClass = evalText.match(/\d+반/);
-                var itemClass = rawClass ? parseInt(rawClass[0]) : 0;
+                if (!r || r.length < 3) continue;
                 
-                if(itemClass === 0 && !isNaN(r[1])) { itemClass = parseInt(r[1]); }
-                if(itemClass !== parseInt(targetClass)) continue;
+                // r[1](반 필드) 혹은 r[2](evaluator 닉네임 필드)에서 가입 반을 지능형 스캔
+                var contextText = (r[2] || "").toString() + " " + (r[1] || "").toString();
+                var matchResult = contextText.match(/(\d+)반/);
+                var itemClass = matchResult ? parseInt(matchResult[1]) : parseInt(r[1]);
                 
-                // 대상자 이름 추출 인덱스 교정 (mode 1: r[3], mode 2: r[2], mode 3: r[2])
+                if (isNaN(itemClass) || itemClass !== parseInt(targetClass)) continue;
+                
+                // 피평가 대상자 이름 가공 (mode 1: r[3], mode 2: r[2], mode 3: r[2])
                 var targetName = (mode === 1) ? (r[3] || "미정") : (r[2] || "미정");
+                targetName = targetName.toString().trim();
+                
                 if(!groups[targetName]) groups[targetName] = [];
                 groups[targetName].push(r);
             }
@@ -670,21 +664,20 @@
             accountTbody.innerHTML = '';
             var hasAccount = false;
             
-            // 미리 판매자, 구매자, 동료 평가 점수 평균 가공
             var stats = { seller: {}, buyer: {}, team: {} };
             
             globalCloudDatabase.seller.forEach(function(r){
-                var name = r[3]; if(!name) return;
+                var name = r[3]; if(!name) return; name = name.toString().trim();
                 if(!stats.seller[name]) stats.seller[name] = [];
                 if(scoreMap[r[4]]) stats.seller[name].push(scoreMap[r[4]]);
             });
             globalCloudDatabase.buyer.forEach(function(r){
-                var name = r[2]; if(!name) return;
+                var name = r[2]; if(!name) return; name = name.toString().trim();
                 if(!stats.buyer[name]) stats.buyer[name] = [];
                 if(scoreMap[r[3]]) stats.buyer[name].push(scoreMap[r[3]]);
             });
             globalCloudDatabase.team.forEach(function(r){
-                var name = r[2]; if(!name) return;
+                var name = r[2]; if(!name) return; name = name.toString().trim();
                 if(!stats.team[name]) stats.team[name] = [];
                 if(scoreMap[r[3]]) stats.team[name].push(scoreMap[r[3]]);
             });
@@ -696,7 +689,6 @@
                 hasAccount = true;
                 var uniqueKey = u[0] + "_" + u[1];
                 
-                // 기존 저장된 다중 평가 세부 항목 복원 파싱
                 var cellValues = ["0","0","0","0","0","0"];
                 var cleanFeedback = u[5] || "";
                 if(cleanFeedback.indexOf("[") === 0 && cleanFeedback.indexOf("]") > 0) {
@@ -705,7 +697,7 @@
                     cellValues = corePart.split("/");
                     cleanFeedback = cleanFeedback.substring(closeIdx + 1).trim();
                 } else if(u[4]) {
-                    cellValues[0] = u[4]; // 예외 백업
+                    cellValues[0] = u[4];
                 }
 
                 var baseScore = 14;
@@ -742,7 +734,6 @@
             }
         }
 
-        // 📊 교사용 실시간 통계 수치 시각화 화면단 결합 생성 규칙
         function renderCloudGroupedView(viewId, records, classNum, mode, statObj) {
             var container = document.getElementById(viewId);
             container.innerHTML = '';
