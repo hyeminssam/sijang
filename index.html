@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v17</title>
+    <title>지식시장 수행평가 종합 시스템 v18</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -110,7 +110,7 @@
                     <label>번호</label>
                     <select id="loginNumber" required>
                         <option value="">선택(번)</option>
-                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4번</option><option value="5">5번</option>
+                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
                         <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
                         <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
                         <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
@@ -369,7 +369,7 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT STABLE ENGINE v17
+                        JAVASCRIPT STABLE ENGINE v18
          ============================================================= -->
     <script>
         // 🚨 [필수 반영] 구글 시트 배포 주소를 아래에 꼭 입력해주세요.
@@ -525,7 +525,6 @@
                 });
         }
 
-        // 🔥 [v17 핵심수정] 메뉴를 진입할 때마다 기존 입력 폼을 완벽하게 세척(Reset)
         function enterMenu(menuType) {
             if(!menuPermissions[menuType]) { alert('선생님이 아직 비활성화해 두신 메뉴입니다.'); return; }
             
@@ -545,6 +544,8 @@
         function handleLogout() { switchPage('pageLogin'); }
         function exitSubPage() { switchPage('pageMenu'); }
 
+        // 🔥 [v18 구조 교정] 구글 Apps Script 시트 컬럼 템플릿 구조 강제 통일
+        // 시트 기준: ['회차', '평가반', 'evaluator', '대상자', '평정', '시간']
         function submitSellerEval(event) {
             event.preventDefault();
             var round = document.getElementById('sellerRound').value;
@@ -554,7 +555,8 @@
                 var name = document.getElementById("buyerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='buyerAttitude" + i + "']:checked").value;
-                    sendToGoogleDatabase('seller', [round, currentSessionUser.classNum, currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
+                    // 컬럼 템플릿 배열 배치 순서 일치 전송
+                    sendToGoogleDatabase('seller', [round, currentSessionUser.classNum, "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
             }
@@ -562,6 +564,7 @@
             exitSubPage();
         }
 
+        // 시트 기준: ['부스조', 'evaluator', '대상자', '평정', '시간']
         function submitBuyerEval(event) {
             event.preventDefault();
             var booth = document.getElementById('buyerBooth').value;
@@ -571,7 +574,6 @@
                 var name = document.getElementById("sellerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='sellerScore" + i + "']:checked").value;
-                    // buyer시트 구조 연동: [0:부스조, 1:evaluator(반매칭용), 2:대상자, 3:평정, 4:시간]
                     sendToGoogleDatabase('buyer', [booth, "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
@@ -597,7 +599,6 @@
             alert('제출 완료!'); exitSubPage();
         }
 
-        // 🔥 [v17 핵심수정] 선생님 채점 완료 후 마스터 관제 센터 화면 유지
         function saveStudentScore(key, classNum, num) {
             var scoreVal = document.getElementById("score_input_" + key).value;
             var feedbackVal = document.getElementById("feedback_input_" + key).value;
@@ -610,25 +611,24 @@
                 body: JSON.stringify(payload)
             }).then(function(){
                 alert('수행 평가 점수와 피드백이 실시간으로 안전하게 반영되었습니다.');
-                fetchAllDataFromGoogle(); // 대문으로 튕기지 않고 관제 화면 데이터만 새로고침!
+                fetchAllDataFromGoogle(); 
             });
         }
 
-        // 🧠 [v17 핵심수정] 구글 데이터 파싱 알고리즘 전면 교정 (판매자 리포트 완벽 활성화)
+        // 🧠 [v18 최종 완성] 모드별(판매자/구매자) 구글 데이터 컬럼 파싱 매칭 인덱스 최적화
         function processGroupingForClass(records, targetClass, mode) {
             var groups = {};
             for(var i=0; i<records.length; i++) {
                 var r = records[i];
-                var rawText = (mode === 2) ? (r[1] || "") : (r[2] || ""); // mode 2(buyer)인 경우 r[1]에 반정보 기재됨
-                var rawClass = rawText.match(/\d+반/);
+                var evalText = r[1] ? r[1].toString() : (r[2] ? r[2].toString() : ""); 
+                var rawClass = evalText.match(/\d+반/);
                 var itemClass = rawClass ? parseInt(rawClass[0]) : 0;
                 
-                // 만약 문자열 매칭이 실패했다면 기존 원본 index 백업 대조
                 if(itemClass === 0 && !isNaN(r[1])) { itemClass = parseInt(r[1]); }
-
                 if(itemClass !== parseInt(targetClass)) continue;
                 
-                var targetName = r[3] || "미정";
+                // mode 1(seller): r[3]이 대상자 / mode 2(buyer): r[2]가 대상자
+                var targetName = (mode === 1) ? (r[3] || "미정") : (r[2] || "미정");
                 if(!groups[targetName]) groups[targetName] = [];
                 groups[targetName].push(r);
             }
@@ -686,7 +686,7 @@
                     html += '<tr>';
                     if(mode === 1) html += '<td>' + item[0] + '</td><td>' + item[2] + '</td><td><strong>' + item[4] + '</strong></td><td>' + item[5] + '</td>';
                     else if(mode === 2) html += '<td>' + item[0] + '</td><td>' + item[1] + '</td><td><strong>' + item[3] + '</strong></td><td>' + item[4] + '</td>';
-                    else if(mode === 3) html += '<td>' + item[2] + '</td><td><strong>' + item[3] + '</strong></td><td style="text-align:left;">' + item[4] + '</td><td>' + item[5] + '</td>';
+                    else if(mode === 3) html += '<td>' + item[1] + '</td><td><strong>' + item[3] + '</strong></td><td style="text-align:left;">' + item[4] + '</td><td>' + item[5] + '</td>';
                     html += '</tr>';
                 }
                 html += '</tbody></table></div></div>';
@@ -695,7 +695,6 @@
             if(!hasData) container.innerHTML = '<p style="color:#aaa; text-align:center;">데이터가 비어 있습니다.</p>';
         }
 
-        // 🔥 [v17 핵심수정] 토글이 ID 기반으로 각각 독립적으로 닫히고 열리도록 개조
         function toggleSection(id) { var el = document.getElementById(id); if(el) el.classList.toggle('collapsed'); }
         function goMainFromAdmin() { document.getElementById('masterAdminContainer').style.display = 'none'; switchPage('pageLogin'); }
         function switchPage(pageId) {
