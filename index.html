@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v14</title>
+    <title>지식시장 수행평가 종합 시스템 v16</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -71,10 +71,6 @@
         .btn-filter { padding: 6px 14px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
         .btn-filter.active { background: #4c51bf; color: #fff; border-color: #4c51bf; }
 
-        .section-content { display: block; margin-top: 10px; }
-        .section-content.collapsed { display: none; }
-        .btn-toggle-view { background: #e2e8f0; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; color:#4a5568; }
-
         .page { display: none; }
         .page.active { display: block; }
         .user-header { display: flex; justify-content: space-between; background: #e2e8f0; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; }
@@ -110,7 +106,7 @@
                     <label>번호</label>
                     <select id="loginNumber" required>
                         <option value="">선택(번)</option>
-                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4번</option><option value="5">5번</option>
+                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
                         <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
                         <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
                         <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
@@ -126,7 +122,7 @@
                 <label>숫자 비밀번호 (4자리 설정)</label>
                 <input type="password" id="loginPw" maxlength="4" placeholder="자신이 원하는 비번 숫자 4자리">
             </div>
-            <button class="btn-block btn-submit" style="background-color: var(--primary-color); color:white;" onclick="handleLogin()">로그인 / 학생 등록하고 입장</button>
+            <button id="btnLoginAction" class="btn-block btn-submit" style="background-color: var(--primary-color); color:white;" onclick="handleLogin()">로그인 / 학생 등록하고 입장</button>
         </div>
 
         <div id="pageMenu" class="page">
@@ -155,7 +151,7 @@
                     </select>
                 </div>
                 <div class="eval-student-card">
-                    <label style="color:#2b6cb0;">👤 방문 구매자 1 (필수)</label>
+                    <label style="color:#2b6cb0; font-weight:bold;">👤 방문 구매자 1 (필수)</label>
                     <input type="text" id="buyerName1" required placeholder="성명 입력 (예: 김철수)">
                     <div class="radio-options">
                         <label class="radio-label"><input type="radio" name="buyerAttitude1" value="매우 부족">매우 부족</label>
@@ -165,7 +161,29 @@
                         <label class="radio-label"><input type="radio" name="buyerAttitude1" value="매우 우수">매우 우수</label>
                     </div>
                 </div>
-                <button type="submit" class="btn-block btn-submit">평가 제출하기</button>
+                <div class="eval-student-card">
+                    <label style="color:#718096;">👤 방문 구매자 2 (선택)</label>
+                    <input type="text" id="buyerName2" placeholder="성명 입력 (없으면 공란)">
+                    <div class="radio-options">
+                        <label class="radio-label"><input type="radio" name="buyerAttitude2" value="매우 부족">매우 부족</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude2" value="부족">부족</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude2" value="보통" checked>보통</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude2" value="우수">우수</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude2" value="매우 우수">매우 우수</label>
+                    </div>
+                </div>
+                <div class="eval-student-card">
+                    <label style="color:#718096;">👤 방문 구매자 3 (선택)</label>
+                    <input type="text" id="buyerName3" placeholder="성명 입력 (없으면 공란)">
+                    <div class="radio-options">
+                        <label class="radio-label"><input type="radio" name="buyerAttitude3" value="매우 부족">매우 부족</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude3" value="부족">부족</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude3" value="보통" checked>보통</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude3" value="우수">우수</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude3" value="매우 우수">매우 우수</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-block btn-submit">구매자 평가 제출하기</button>
             </form>
             <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
         </div>
@@ -182,7 +200,7 @@
                     </select>
                 </div>
                 <div class="eval-student-card">
-                    <label style="color:#6b46c1;">👤 판매자(설명자) 1 (필수)</label>
+                    <label style="color:#6b46c1; font-weight:bold;">👤 판매자(설명자) 1 (필수)</label>
                     <input type="text" id="sellerName1" required placeholder="설명 학생 성명 입력">
                     <div class="radio-options">
                         <label class="radio-label"><input type="radio" name="sellerScore1" value="매우 못함">매우 못함</label>
@@ -192,7 +210,29 @@
                         <label class="radio-label"><input type="radio" name="sellerScore1" value="매우 잘함">매우 잘함</label>
                     </div>
                 </div>
-                <button type="submit" class="btn-block btn-submit">평가 제출하기</button>
+                <div class="eval-student-card">
+                    <label style="color:#718096;">👤 판매자(설명자) 2 (선택)</label>
+                    <input type="text" id="sellerName2" placeholder="설명 학생 성명 입력 (없으면 공란)">
+                    <div class="radio-options">
+                        <label class="radio-label"><input type="radio" name="sellerScore2" value="매우 못함">매우 못함</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore2" value="못함">못함</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore2" value="보통" checked>보통</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore2" value="잘함">잘함</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore2" value="매우 잘함">매우 잘함</label>
+                    </div>
+                </div>
+                <div class="eval-student-card">
+                    <label style="color:#718096;">👤 판매자(설명자) 3 (선택)</label>
+                    <input type="text" id="sellerName3" placeholder="설명 학생 성명 입력 (없으면 공란)">
+                    <div class="radio-options">
+                        <label class="radio-label"><input type="radio" name="sellerScore3" value="매우 못함">매우 못함</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore3" value="못함">못함</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore3" value="보통" checked>보통</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore3" value="잘함">잘함</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore3" value="매우 잘함">매우 잘함</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-block btn-submit">발표 평가 제출하기</button>
             </form>
             <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
         </div>
@@ -322,7 +362,7 @@
     </div>
 
     <script>
-        // 🚨 [필수 반영] 1단계의 최신 업그레이드 웹 앱 URL 주소를 넣어주세요.
+        // 🚨 [필수 반영] 구글 시트 배포 주소를 아래에 꼭 입력해주세요.
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-XLXvw1WfxRx2byj3Y0TEBN_672_oMcnkl7zydTdvF5ZXWnYBTaI4EYi-xLTPHyZATg/exec";
 
         var currentSessionUser = null;
@@ -354,7 +394,6 @@
                     globalCloudDatabase.team = cloudData.team || [];
                     globalCloudDatabase.self = cloudData.self || [];
                     
-                    // 메뉴 잠금 상태 실시간 복원 반영
                     if (cloudData.perms && cloudData.perms.length > 0) {
                         var p = cloudData.perms[0];
                         document.getElementById('toggle_seller').checked = (p[0] === true || p[0] === 'true');
@@ -367,21 +406,16 @@
                 });
         }
 
-        // 🔥 [신규 반영] 관리자 페이지 메뉴 통제권 구글 실시간 동기화
         function updateMenuControl() {
             var pSeller = document.getElementById('toggle_seller').checked;
             var pBuyer = document.getElementById('toggle_buyer').checked;
             var pTeam = document.getElementById('toggle_team').checked;
             var pSelf = document.getElementById('toggle_self').checked;
             var pScore = document.getElementById('toggle_score').checked;
-            
             sendToGoogleDatabase('perms', [pSeller, pBuyer, pTeam, pSelf, pScore]);
         }
 
-        function openAdminModal() {
-            document.getElementById('modalInputPw').value = ''; 
-            document.getElementById('customAdminModal').style.display = 'flex';
-        }
+        function openAdminModal() { document.getElementById('modalInputPw').value = ''; document.getElementById('customAdminModal').style.display = 'flex'; }
         function closeAdminModal() { document.getElementById('customAdminModal').style.display = 'none'; }
 
         function verifyAdminPassword() {
@@ -412,39 +446,77 @@
                 currentSessionUser = { classNum: 1, number: 1, name: "교사" };
                 switchPage('pageMenu'); return;
             }
-            if(!cls || !num || !name || pw.length !== 4) { alert('정확히 기입하세요.'); return; }
+            if(!cls || !num || !name || pw.length !== 4) { alert('모든 정보를 빈칸 없이 정확히 입력하세요.'); return; }
 
-            currentSessionUser = { classNum: parseInt(cls), number: parseInt(num), name: name };
-            sendToGoogleDatabase('accounts', [parseInt(cls), parseInt(num), name, pw, '', '']);
-            
-            document.getElementById('displayUserInfo').innerText = cls + "반 " + num + "번 " + name + " 학생";
-            
-            // 🔄 로그인할 때 구글 시트에서 학생 잠금 정보 및 내 점수 실시간 연동 로드
-            fetch(WEB_APP_URL + "?action=fetchStudentDashboard&classNum=" + cls + "&number=" + num)
-                .then(function(r){ return r.json(); })
-                .then(function(res){
-                    currentSessionUser.finalScore = res.finalScore;
-                    currentSessionUser.feedback = res.feedback;
+            var loginBtn = document.getElementById('btnLoginAction');
+            loginBtn.innerText = "데이터베이스 검증 중...";
+            loginBtn.disabled = true;
+
+            fetch(WEB_APP_URL + "?action=fetchAllData")
+                .then(function(res) { return res.json(); })
+                .then(function(cloudData) {
+                    var accs = cloudData.accounts || [];
+                    var isDuplicate学번 = false;
+                    var isMatchedExistUser = false;
+
+                    for(var i=0; i<accs.length; i++) {
+                        var u = accs[i];
+                        if(parseInt(u[0]) === parseInt(cls) && parseInt(u[1]) === parseInt(num)) {
+                            if(u[2].trim() === name && u[3].toString().trim() === pw) {
+                                isMatchedExistUser = true;
+                            } else {
+                                isDuplicate学번 = true;
+                            }
+                            break;
+                        }
+                    }
+
+                    if(isDuplicate学번) {
+                        alert('❌ [가입 불가] 이미 다른 학생이 등록을 완료한 학번(반/번호)입니다.\n본인의 반, 번호가 맞는지 다시 한 번 확인해 주세요!');
+                        loginBtn.innerText = "로그인 / 학생 등록하고 입장";
+                        loginBtn.disabled = false;
+                        return;
+                    }
+
+                    currentSessionUser = { classNum: parseInt(cls), number: parseInt(num), name: name };
                     
-                    // 실시간 잠금 제어 허용 유무 동기화
-                    menuPermissions.seller = (res.perms[0] === true || res.perms[0] === 'true');
-                    menuPermissions.buyer = (res.perms[1] === true || res.perms[1] === 'true');
-                    menuPermissions.team = (res.perms[2] === true || res.perms[2] === 'true');
-                    menuPermissions.self = (res.perms[3] === true || res.perms[3] === 'true');
-                    menuPermissions.score = (res.perms[4] === true || res.perms[4] === 'true');
+                    if(!isMatchedExistUser) {
+                        sendToGoogleDatabase('accounts', [parseInt(cls), parseInt(num), name, pw, '', '']);
+                    }
+
+                    document.getElementById('displayUserInfo').innerText = cls + "반 " + num + "번 " + name + " 학생";
                     
-                    var menus = ['seller', 'buyer', 'team', 'self', 'score'];
-                    menus.forEach(function(m, idx){
-                        var el = document.getElementById("menu_" + m);
-                        if(el) el.className = menuPermissions[m] ? 'btn-menu' : 'btn-menu disabled';
-                    });
-                    
-                    switchPage('pageMenu');
+                    fetch(WEB_APP_URL + "?action=fetchStudentDashboard&classNum=" + cls + "&number=" + num)
+                        .then(function(r){ return r.json(); })
+                        .then(function(res){
+                            currentSessionUser.finalScore = res.finalScore;
+                            currentSessionUser.feedback = res.feedback;
+                            
+                            menuPermissions.seller = (res.perms[0] === true || res.perms[0] === 'true');
+                            menuPermissions.buyer = (res.perms[1] === true || res.perms[1] === 'true');
+                            menuPermissions.team = (res.perms[2] === true || res.perms[2] === 'true');
+                            menuPermissions.self = (res.perms[3] === true || res.perms[3] === 'true');
+                            menuPermissions.score = (res.perms[4] === true || res.perms[4] === 'true');
+                            
+                            var menus = ['seller', 'buyer', 'team', 'self', 'score'];
+                            menus.forEach(function(m){
+                                var el = document.getElementById("menu_" + m);
+                                if(el) el.className = menuPermissions[m] ? 'btn-menu' : 'btn-menu disabled';
+                            });
+                            
+                            loginBtn.innerText = "로그인 / 학생 등록하고 입장";
+                            loginBtn.disabled = false;
+                            switchPage('pageMenu');
+                        });
+                }).catch(function(err) {
+                    alert("서버 연결에 실패했습니다.");
+                    loginBtn.innerText = "로그인 / 학생 등록하고 입장";
+                    loginBtn.disabled = false;
                 });
         }
 
         function enterMenu(menuType) {
-            if(!menuPermissions[menuType]) { alert('현재 잠긴 메뉴입니다.'); return; }
+            if(!menuPermissions[menuType]) { alert('선생님이 아직 비활성화해 두신 메뉴입니다.'); return; }
             if(menuType === 'score') {
                 document.getElementById('scoreStudentLabel').innerText = currentSessionUser.name;
                 document.getElementById('scoreDisplayValue').innerText = currentSessionUser.finalScore ? currentSessionUser.finalScore + " 점" : "아직 채점 점수가 등록되지 않았습니다.";
@@ -456,22 +528,40 @@
         function handleLogout() { switchPage('pageLogin'); }
         function exitSubPage() { switchPage('pageMenu'); }
 
+        // 🔥 [v16 핵심 변경] 다중 평가 전송 루프 파이프라인
         function submitSellerEval(event) {
             event.preventDefault();
             var round = document.getElementById('sellerRound').value;
-            var name = document.getElementById("buyerName1").value.trim();
-            var score = document.querySelector("input[name='buyerAttitude1']:checked").value;
-            sendToGoogleDatabase('seller', [round, currentSessionUser.classNum, currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
-            alert('제출 완료!'); exitSubPage();
+            var hasSubmitted = false;
+
+            for(var i=1; i<=3; i++) {
+                var name = document.getElementById("buyerName" + i).value.trim();
+                // 1번 필수 검증은 HTML input required가 수행, 2,3번은 이름이 채워져 있을 때만 루프 작동
+                if(name) {
+                    var score = document.querySelector("input[name='buyerAttitude" + i + "']:checked").value;
+                    sendToGoogleDatabase('seller', [round, currentSessionUser.classNum, currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
+                    hasSubmitted = true;
+                }
+            }
+            if(hasSubmitted) alert('구매자 평가 데이터가 구글 데이터베이스에 정상 누적되었습니다.');
+            exitSubPage();
         }
 
         function submitBuyerEval(event) {
             event.preventDefault();
             var booth = document.getElementById('buyerBooth').value;
-            var name = document.getElementById("sellerName1").value.trim();
-            var score = document.querySelector("input[name='sellerScore1']:checked").value;
-            sendToGoogleDatabase('buyer', [booth, currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
-            alert('제출 완료!'); exitSubPage();
+            var hasSubmitted = false;
+
+            for(var i=1; i<=3; i++) {
+                var name = document.getElementById("sellerName" + i).value.trim();
+                if(name) {
+                    var score = document.querySelector("input[name='sellerScore" + i + "']:checked").value;
+                    sendToGoogleDatabase('buyer', [booth, currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
+                    hasSubmitted = true;
+                }
+            }
+            if(hasSubmitted) alert('판매자 발표 평가 데이터가 구글 데이터베이스에 정상 누적되었습니다.');
+            exitSubPage();
         }
 
         function submitTeamEval(event) {
@@ -491,12 +581,9 @@
             alert('제출 완료!'); exitSubPage();
         }
 
-        // 🔥 [신규 반영] 선생님이 점수 입력 후 반영 누르면 구글 시트로 강제 연동 업데이트
         function saveStudentScore(key, classNum, num) {
             var scoreVal = document.getElementById("score_input_" + key).value;
             var feedbackVal = document.getElementById("feedback_input_" + key).value;
-            
-            // 데이터베이스로 채점 내역 즉시 전송
             var payload = { type: 'scores_sync', data: [classNum, num, '', scoreVal, feedbackVal] };
             fetch(WEB_APP_URL, {
                 method: "POST",
@@ -504,7 +591,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             }).then(function(){
-                alert('수행 평가 점수와 피드백이 학생 디벗으로 실시간 공개 처리되었습니다!');
+                alert('수행 평가 결과가 실시간으로 안전하게 반영되었습니다.');
                 fetchAllDataFromGoogle();
             });
         }
@@ -528,7 +615,7 @@
             
             var accs = globalCloudDatabase.accounts;
             for(var i=0; i<accs.length; i++) {
-                var u = accs[i]; // [0:반, 1:번호, 2:이름, 3:비밀번호, 4:점수, 5:피드백]
+                var u = accs[i]; 
                 if(parseInt(u[0]) !== activeAccountClass) continue;
                 hasAccount = true;
                 var uniqueKey = u[0] + "_" + u[1];
@@ -567,7 +654,6 @@
                 var html = '<div class="class-section" style="border-left: 5px solid var(--secondary-color);">' +
                            '<p style="font-weight:bold; margin-bottom:6px;">🎯 대상자 성명: [ ' + targetName + ' ] 학생 평정</p>' +
                            '<div class="table-wrapper"><table><tbody>';
-                
                 for(var k=0; k<list.length; k++) {
                     var item = list[k];
                     html += '<tr>';
