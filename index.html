@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지식시장 수행평가 종합 시스템 v14</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary-color: #aec6cf; 
+            --secondary-color: #b39eb5; 
+            --mint-color: #b4e7ce; 
+            --text-color: #4a4a4a;
+            --border-color: #e2e8f0;
+            --warning-color: #ffe5e5;
+            --danger-color: #feb2b2;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+        .container { width: 100%; max-width: 820px; background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); position: relative; }
+        h2 { text-align: center; margin-bottom: 20px; color: #5a6b7c; }
+        h3 { margin-top: 25px; margin-bottom: 10px; color: #2d3748; border-left: 4px solid var(--secondary-color); padding-left: 8px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .admin-trigger { position: absolute; top: 20px; right: 20px; z-index: 999; }
+        .btn-sm { background-color: #e2e8f0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; color: #64748b; font-weight: bold; }
+        .btn-sm:hover { background-color: #cbd5e1; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; }
+        
+        input[type="text"], input[type="password"], input[type="number"], select, textarea {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; outline: none; background-color: #fff; display: block;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        input:focus, select:focus, textarea:focus { border-color: var(--secondary-color); }
+
+        .info-text { background-color: #f1f5f9; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 20px; font-size: 0.92rem; border-left: 4px solid var(--primary-color); }
+        .alert-text { background-color: var(--warning-color); padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #c53030; font-weight: bold; margin-bottom: 15px; text-align: center;}
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .btn-menu { background-color: #f8fafc; border: 2px solid #e2e8f0; padding: 20px; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: bold; text-align: center; transition: all 0.2s; }
+        .btn-menu:hover { border-color: var(--secondary-color); background-color: #f1f5f9; }
+        .btn-menu.disabled { background-color: #e2e8f0; color: #94a3b8; cursor: not-allowed; border-color: #cbd5e1; opacity: 0.6; }
+
+        .eval-student-card { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 18px; border-radius: 12px; margin-bottom: 15px; }
+        
+        .btn-block { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-submit { background-color: var(--mint-color); color: #2d3748; }
+        .btn-back { background-color: #e2e8f0; color: #4a4a4a; margin-top: 15px; }
+
+        .radio-options { display: flex; justify-content: space-between; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 6px; margin-bottom: 10px; }
+        .radio-label { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; cursor: pointer; }
+
+        .admin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
+        .modal-body { background: #fff; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: center; }
+
+        .admin-container { max-width: 1200px; display: none; background: #ffffff; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
+        .table-wrapper { overflow-x: auto; margin-bottom: 15px; background: #fff; border-radius: 8px; border: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 720px; }
+        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: center; }
+        th { background-color: #f1f5f9; color:#4a5568; }
+        
+        .class-section { border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-top: 10px; margin-bottom: 15px; background: #fff; }
+        .toggle-panel { display: flex; flex-wrap: wrap; gap: 15px; background: #edf2f7; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+
+        .class-filter-buttons { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+        .btn-filter { padding: 6px 14px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+        .btn-filter.active { background: #4c51bf; color: #fff; border-color: #4c51bf; }
+
+        .section-content { display: block; margin-top: 10px; }
+        .section-content.collapsed { display: none; }
+        .btn-toggle-view { background: #e2e8f0; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; color:#4a5568; }
+
+        .page { display: none; }
+        .page.active { display: block; }
+        .user-header { display: flex; justify-content: space-between; background: #e2e8f0; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div id="customAdminModal" class="admin-modal">
+        <div class="modal-body">
+            <h4 style="margin-bottom: 12px; color: #4a5568;">🔑 교사용 마스터 비밀번호</h4>
+            <input type="password" id="modalInputPw" placeholder="비밀번호 4자리 입력" style="margin-bottom: 15px; text-align: center;">
+            <button class="btn-block btn-submit" onclick="verifyAdminPassword()" style="margin-top: 0;">인증 완료</button>
+            <button class="btn-block" onclick="closeAdminModal()" style="background:#e2e8f0; color:#4a4a4a;">닫기</button>
+        </div>
+    </div>
+
+    <div id="mainContainer" class="container">
+        <button class="admin-trigger btn-sm" onclick="openAdminModal()">관리자 페이지</button>
+
+        <div id="pageLogin" class="page active">
+            <h2>지식시장 로그인 및 계정 등록</h2>
+            <div class="alert-text">⚠️ 비밀번호는 본인이 원하는 숫자 4자리로 설정하고 꼭 기억하세요! <br>팅겨도 같은 반/번호/이름과 설정한 비밀번호를 치면 작성기록이 복구됩니다.</div>
+            
+            <div class="form-grid">
+                <div>
+                    <label>반</label>
+                    <select id="loginClass" required>
+                        <option value="">선택(반)</option>
+                        <option value="1">1반</option><option value="2">2반</option><option value="3">3반</option><option value="4">4반</option><option value="5">5반</option><option value="6">6반</option><option value="7">7반</option>
+                    </select>
+                </div>
+                <div>
+                    <label>번호</label>
+                    <select id="loginNumber" required>
+                        <option value="">선택(번)</option>
+                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4번</option><option value="5">5번</option>
+                        <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
+                        <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
+                        <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
+                        <option value="21">21번</option><option value="22">22번</option><option value="23">23번</option><option value="24">24번</option><option value="25">25번</option>
+                    </select>
+                </div>
+                <div>
+                    <label>이름</label>
+                    <input type="text" id="loginName" placeholder="성명 전체 입력">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>숫자 비밀번호 (4자리 설정)</label>
+                <input type="password" id="loginPw" maxlength="4" placeholder="자신이 원하는 비번 숫자 4자리">
+            </div>
+            <button class="btn-block btn-submit" style="background-color: var(--primary-color); color:white;" onclick="handleLogin()">로그인 / 학생 등록하고 입장</button>
+        </div>
+
+        <div id="pageMenu" class="page">
+            <div class="user-header">
+                <span id="displayUserInfo">-</span>
+                <button class="btn-sm" onclick="handleLogout()">로그아웃</button>
+            </div>
+            <h2>수행평가 대시보드</h2>
+            <div class="menu-grid">
+                <div id="menu_seller" class="btn-menu" onclick="enterMenu('seller')">1. 판매자로 참여<br><span style="font-size:0.8rem; font-weight:normal;">(구매 태도 평가)</span></div>
+                <div id="menu_buyer" class="btn-menu" onclick="enterMenu('buyer')">2. 구매자로 참여<br><span style="font-size:0.8rem; font-weight:normal;">(설명 발표 평가)</span></div>
+                <div id="menu_team" class="btn-menu" onclick="enterMenu('team')">3. 조원(동료) 평가<br><span style="font-size:0.8rem; font-weight:normal;">(조원 기여도 및 사유)</span></div>
+                <div id="menu_self" class="btn-menu" onclick="enterMenu('self')">4. 자기 평가<br><span style="font-size:0.8rem; font-weight:normal;">(나의 탐구 성찰)</span></div>
+            </div>
+            <div id="menu_score" class="btn-menu" style="margin-top:12px; display:block;" onclick="enterMenu('score')">🔑 5. 내 수행평가 점수 / 피드백 확인란</div>
+        </div>
+
+        <div id="pageSeller" class="page">
+            <h2>1. 판매자 평가 (구매자 태도)</h2>
+            <div class="info-text">💡 우리 부스에 방문한 구매자들의 태도를 평가해 주세요. <br><span style="color:red; font-weight:bold;">※ 이름은 반드시 성을 붙여 전체 이름을 정확하게 적어주세요. <br>※ 퀴즈를 낸 사람이 아니라, 우리 부스에 와서 설명을 들은 친구들만 평가 대상입니다.</span></div>
+            <form id="sellerForm" onsubmit="submitSellerEval(event)">
+                <div class="form-group" style="width:200px;">
+                    <label>⏱️ 현재 활동 회차</label>
+                    <select id="sellerRound" required>
+                        <option value="1회차">1회차 타임</option><option value="2회차">2회차 타임</option><option value="3회차">3회차 타임</option>
+                    </select>
+                </div>
+                <div class="eval-student-card">
+                    <label style="color:#2b6cb0;">👤 방문 구매자 1 (필수)</label>
+                    <input type="text" id="buyerName1" required placeholder="성명 입력 (예: 김철수)">
+                    <div class="radio-options">
+                        <label class="radio-label"><input type="radio" name="buyerAttitude1" value="매우 부족">매우 부족</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude1" value="부족">부족</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude1" value="보통" checked>보통</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude1" value="우수">우수</label>
+                        <label class="radio-label"><input type="radio" name="buyerAttitude1" value="매우 우수">매우 우수</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-block btn-submit">평가 제출하기</button>
+            </form>
+            <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
+        </div>
+
+        <div id="pageBuyer" class="page">
+            <h2>2. 구매자 평가 (판매자 발표)</h2>
+            <div class="info-text">💡 내가 방문한 탐구 부스의 설명자들을 평가해 주세요. <br><span style="color:red; font-weight:bold;">※ 이름은 반드시 성을 붙여 전체 이름을 정확하게 적어주세요. <br>※ 퀴즈를 낸 사람이 아니라, 부스에서 나에게 직접 '설명 발표'를 한 친구들만 평가 대상입니다.</span></div>
+            <form id="buyerForm" onsubmit="submitBuyerEval(event)">
+                <div class="form-group" style="width:230px;">
+                    <label>⛺ 방문 부스 조 선택</label>
+                    <select id="buyerBooth" required>
+                        <option value="">-- 조 선택 --</option>
+                        <option value="열평형 조">열평형 조</option><option value="열의 이동방식 조">열의 이동방식 조</option><option value="비열 조">비열 조</option><option value="열팽창 조">열팽창 조</option>
+                    </select>
+                </div>
+                <div class="eval-student-card">
+                    <label style="color:#6b46c1;">👤 판매자(설명자) 1 (필수)</label>
+                    <input type="text" id="sellerName1" required placeholder="설명 학생 성명 입력">
+                    <div class="radio-options">
+                        <label class="radio-label"><input type="radio" name="sellerScore1" value="매우 못함">매우 못함</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore1" value="못함">못함</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore1" value="보통" checked>보통</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore1" value="잘함">잘함</label>
+                        <label class="radio-label"><input type="radio" name="sellerScore1" value="매우 잘함">매우 잘함</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-block btn-submit">평가 제출하기</button>
+            </form>
+            <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
+        </div>
+
+        <div id="pageTeam" class="page">
+            <h2>3. 조원(동료) 평가</h2>
+            <form id="teamForm" onsubmit="submitTeamEval(event)">
+                <div class="eval-student-card">
+                    <label>👤 평가 대상 조원 이름</label>
+                    <input type="text" id="teamTargetName" required placeholder="조원 성명 전체 입력">
+                    <label style="margin-top:12px;">📊 협력 및 참여 기여도 (5단계)</label>
+                    <div class="radio-options">
+                        <label class="radio-label"><input type="radio" name="teamScore" value="매우 미흡">매우 미흡</label>
+                        <label class="radio-label"><input type="radio" name="teamScore" value="미흡">미흡</label>
+                        <label class="radio-label"><input type="radio" name="teamScore" value="보통" checked>보통</label>
+                        <label class="radio-label"><input type="radio" name="teamScore" value="우수">우수</label>
+                        <label class="radio-label"><input type="radio" name="teamScore" value="매우 우수">매우 우수</label>
+                    </div>
+                    <label style="margin-top:12px;">✍️ 구체적인 사유</label>
+                    <textarea id="teamReason" required></textarea>
+                </div>
+                <button type="submit" class="btn-block btn-submit">동료 평가 제출</button>
+            </form>
+            <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
+        </div>
+
+        <div id="pageSelf" class="page">
+            <h2>4. 나의 성찰 자기 평가</h2>
+            <form id="selfForm" onsubmit="submitSelfEval(event)">
+                <div class="eval-student-card">
+                    <label>📊 본인의 프로젝트 참여 총평</label>
+                    <div class="radio-options">
+                        <label class="radio-label"><input type="radio" name="selfScore" value="매우 미흡">매우 미흡</label>
+                        <label class="radio-label"><input type="radio" name="selfScore" value="미흡">미흡</label>
+                        <label class="radio-label"><input type="radio" name="selfScore" value="보통" checked>보통</label>
+                        <label class="radio-label"><input type="radio" name="selfScore" value="우수">우수</label>
+                        <label class="radio-label"><input type="radio" name="selfScore" value="매우 우수">매우 우수</label>
+                    </div>
+                    <label style="margin-top:12px;">✍️ 성장한 점 및 반성할 점</label>
+                    <textarea id="selfReason" required></textarea>
+                </div>
+                <button type="submit" class="btn-block btn-submit">자기 평가 제출</button>
+            </form>
+            <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
+        </div>
+
+        <div id="pageScore" class="page">
+            <h2>🔑 나의 수행평가 최종 결과 확인</h2>
+            <div class="eval-student-card">
+                <p>📌 <span id="scoreStudentLabel">학생</span> 수행 정량 평가</p>
+                <div style="font-size:1.4rem; font-weight:bold; color:#2c5282;" id="scoreDisplayValue">불러오는 중...</div>
+                <label style="margin-top:10px; display:block;">💬 교사 피드백 코멘트:</label>
+                <div id="feedbackDisplayValue" style="background:#f7fafc; padding:12px; border-radius:8px;">-</div>
+            </div>
+            <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
+        </div>
+    </div>
+
+    <div id="masterAdminContainer" class="admin-container">
+        <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
+        <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료</p>
+        
+        <h3>⚙️ 학생단 접속 메뉴 활성화 스위치 (실시간 제어)
+            <button class="btn-toggle-view" onclick="toggleSection('sec_switch')">접기/펼치기</button>
+        </h3>
+        <div id="sec_switch" class="section-content toggle-panel">
+            <label><input type="checkbox" id="toggle_seller" checked onchange="updateMenuControl()"> 1. 판매자평가 오픈</label>
+            <label><input type="checkbox" id="toggle_buyer" checked onchange="updateMenuControl()"> 2. 구매자평가 오픈</label>
+            <label><input type="checkbox" id="toggle_team" checked onchange="updateMenuControl()"> 3. 동료평가 오픈</label>
+            <label><input type="checkbox" id="toggle_self" checked onchange="updateMenuControl()"> 4. 자기평가 오픈</label>
+            <label><input type="checkbox" id="toggle_score" checked onchange="updateMenuControl()"> 5. 성적확인 서랍 오픈</label>
+        </div>
+
+        <h3>👥 가입된 학생 명부 및 수행 채점 (실시간 반영)
+            <button class="btn-toggle-view" onclick="toggleSection('sec_accounts')">접기/펼치기</button>
+        </h3>
+        <div id="sec_accounts" class="section-content">
+            <div class="class-filter-buttons">
+                <button id="btn_account_1" class="btn-filter active" onclick="changeClassFilter('account', 1)">1반</button>
+                <button id="btn_account_2" class="btn-filter" onclick="changeClassFilter('account', 2)">2반</button>
+                <button id="btn_account_3" class="btn-filter" onclick="changeClassFilter('account', 3)">3반</button>
+                <button id="btn_account_4" class="btn-filter" onclick="changeClassFilter('account', 4)">4반</button>
+                <button id="btn_account_5" class="btn-filter" onclick="changeClassFilter('account', 5)">5반</button>
+                <button id="btn_account_6" class="btn-filter" onclick="changeClassFilter('account', 6)">6반</button>
+                <button id="btn_account_7" class="btn-filter" onclick="changeClassFilter('account', 7)">7반</button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>소속반</th><th>번호</th><th>성명</th><th>지정 암호</th><th>수행 점수</th><th>종합 피드백 입력</th><th>조작</th></tr>
+                    </thead>
+                    <tbody id="adminUserAccountTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3>📊 1. 구매자 태도 분석 리포트
+            <button class="btn-toggle-view" onclick="toggleSection('sec_report1')">접기/펼치기</button>
+        </h3>
+        <div id="sec_report1" class="section-content"><div id="groupedSellerView"></div></div>
+
+        <h3>📊 2. 판매자 발표 분석 리포트
+            <button class="btn-toggle-view" onclick="toggleSection('sec_report2')">접기/펼치기</button>
+        </h3>
+        <div id="sec_report2" class="section-content"><div id="groupedBuyerView"></div></div>
+
+        <h3>📊 3. 조원 동료 상호 평가 사유 리포트
+            <button class="btn-toggle-view" onclick="toggleSection('sec_report3')">접기/펼치기</button>
+        </h3>
+        <div id="sec_report3" class="section-content"><div id="groupedTeamView"></div></div>
+
+        <h3>📊 4. 학생별 자기 평가 성찰 리포트
+            <button class="btn-toggle-view" onclick="toggleSection('sec_report4')">접기/펼치기</button>
+        </h3>
+        <div id="sec_report4" class="section-content">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>소속반</th><th>학번 번호</th><th>학생 성명</th><th>성찰단계</th><th>자기성찰 내용</th><th>시간</th></tr>
+                    </thead>
+                    <tbody id="flatSelfTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <button class="btn-block btn-back" style="background:#4a5568; color:#fff;" onclick="goMainFromAdmin()">교사 관리 종료 (대문으로)</button>
+    </div>
+
+    <script>
+        // 🚨 [필수 반영] 1단계의 최신 업그레이드 웹 앱 URL 주소를 넣어주세요.
+        var WEB_APP_URL = "여기에_방금_복사한_웹_앱_URL을_넣으세요";
+
+        var currentSessionUser = null;
+        var menuPermissions = { seller: true, buyer: true, team: true, self: true, score: true };
+        var globalCloudDatabase = { accounts: [], seller: [], buyer: [], team: [], self: [] };
+
+        var activeAccountClass = 1;
+
+        window.onload = function() { switchPage('pageLogin'); };
+
+        function sendToGoogleDatabase(dataType, dataRow) {
+            if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: dataType, data: dataRow })
+            });
+        }
+
+        function fetchAllDataFromGoogle() {
+            if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
+            fetch(WEB_APP_URL + "?action=fetchAllData")
+                .then(function(res) { return res.json(); })
+                .then(function(cloudData) {
+                    globalCloudDatabase.accounts = cloudData.accounts || [];
+                    globalCloudDatabase.seller = cloudData.seller || [];
+                    globalCloudDatabase.buyer = cloudData.buyer || [];
+                    globalCloudDatabase.team = cloudData.team || [];
+                    globalCloudDatabase.self = cloudData.self || [];
+                    
+                    // 메뉴 잠금 상태 실시간 복원 반영
+                    if (cloudData.perms && cloudData.perms.length > 0) {
+                        var p = cloudData.perms[0];
+                        document.getElementById('toggle_seller').checked = (p[0] === true || p[0] === 'true');
+                        document.getElementById('toggle_buyer').checked = (p[1] === true || p[1] === 'true');
+                        document.getElementById('toggle_team').checked = (p[2] === true || p[2] === 'true');
+                        document.getElementById('toggle_self').checked = (p[3] === true || p[3] === 'true');
+                        document.getElementById('toggle_score').checked = (p[4] === true || p[4] === 'true');
+                    }
+                    renderAdminDashboard();
+                });
+        }
+
+        // 🔥 [신규 반영] 관리자 페이지 메뉴 통제권 구글 실시간 동기화
+        function updateMenuControl() {
+            var pSeller = document.getElementById('toggle_seller').checked;
+            var pBuyer = document.getElementById('toggle_buyer').checked;
+            var pTeam = document.getElementById('toggle_team').checked;
+            var pSelf = document.getElementById('toggle_self').checked;
+            var pScore = document.getElementById('toggle_score').checked;
+            
+            sendToGoogleDatabase('perms', [pSeller, pBuyer, pTeam, pSelf, pScore]);
+        }
+
+        function openAdminModal() {
+            document.getElementById('modalInputPw').value = ''; 
+            document.getElementById('customAdminModal').style.display = 'flex';
+        }
+        function closeAdminModal() { document.getElementById('customAdminModal').style.display = 'none'; }
+
+        function verifyAdminPassword() {
+            if (document.getElementById('modalInputPw').value === '4505') {
+                closeAdminModal();
+                document.getElementById('mainContainer').style.display = 'none';
+                document.getElementById('masterAdminContainer').style.display = 'block';
+                fetchAllDataFromGoogle(); 
+            } else { alert('비밀번호 오류'); }
+        }
+
+        function changeClassFilter(target, classNum) {
+            activeAccountClass = classNum;
+            for(var i = 1; i <= 7; i++) {
+                var btn = document.getElementById('btn_account_' + i);
+                if(btn) btn.className = (i === classNum) ? 'btn-filter active' : 'btn-filter';
+            }
+            renderAdminDashboard();
+        }
+
+        function handleLogin() {
+            var cls = document.getElementById('loginClass').value;
+            var num = document.getElementById('loginNumber').value;
+            var name = document.getElementById('loginName').value.trim();
+            var pw = document.getElementById('loginPw').value.trim();
+
+            if (name === "관리자" && pw === "4505") {
+                currentSessionUser = { classNum: 1, number: 1, name: "교사" };
+                switchPage('pageMenu'); return;
+            }
+            if(!cls || !num || !name || pw.length !== 4) { alert('정확히 기입하세요.'); return; }
+
+            currentSessionUser = { classNum: parseInt(cls), number: parseInt(num), name: name };
+            sendToGoogleDatabase('accounts', [parseInt(cls), parseInt(num), name, pw, '', '']);
+            
+            document.getElementById('displayUserInfo').innerText = cls + "반 " + num + "번 " + name + " 학생";
+            
+            // 🔄 로그인할 때 구글 시트에서 학생 잠금 정보 및 내 점수 실시간 연동 로드
+            fetch(WEB_APP_URL + "?action=fetchStudentDashboard&classNum=" + cls + "&number=" + num)
+                .then(function(r){ return r.json(); })
+                .then(function(res){
+                    currentSessionUser.finalScore = res.finalScore;
+                    currentSessionUser.feedback = res.feedback;
+                    
+                    // 실시간 잠금 제어 허용 유무 동기화
+                    menuPermissions.seller = (res.perms[0] === true || res.perms[0] === 'true');
+                    menuPermissions.buyer = (res.perms[1] === true || res.perms[1] === 'true');
+                    menuPermissions.team = (res.perms[2] === true || res.perms[2] === 'true');
+                    menuPermissions.self = (res.perms[3] === true || res.perms[3] === 'true');
+                    menuPermissions.score = (res.perms[4] === true || res.perms[4] === 'true');
+                    
+                    var menus = ['seller', 'buyer', 'team', 'self', 'score'];
+                    menus.forEach(function(m, idx){
+                        var el = document.getElementById("menu_" + m);
+                        if(el) el.className = menuPermissions[m] ? 'btn-menu' : 'btn-menu disabled';
+                    });
+                    
+                    switchPage('pageMenu');
+                });
+        }
+
+        function enterMenu(menuType) {
+            if(!menuPermissions[menuType]) { alert('현재 잠긴 메뉴입니다.'); return; }
+            if(menuType === 'score') {
+                document.getElementById('scoreStudentLabel').innerText = currentSessionUser.name;
+                document.getElementById('scoreDisplayValue').innerText = currentSessionUser.finalScore ? currentSessionUser.finalScore + " 점" : "아직 채점 점수가 등록되지 않았습니다.";
+                document.getElementById('feedbackDisplayValue').innerText = currentSessionUser.feedback || "등록된 코멘트 피드백이 없습니다.";
+            }
+            switchPage("page" + menuType.charAt(0).toUpperCase() + menuType.slice(1));
+        }
+
+        function handleLogout() { switchPage('pageLogin'); }
+        function exitSubPage() { switchPage('pageMenu'); }
+
+        function submitSellerEval(event) {
+            event.preventDefault();
+            var round = document.getElementById('sellerRound').value;
+            var name = document.getElementById("buyerName1").value.trim();
+            var score = document.querySelector("input[name='buyerAttitude1']:checked").value;
+            sendToGoogleDatabase('seller', [round, currentSessionUser.classNum, currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
+            alert('제출 완료!'); exitSubPage();
+        }
+
+        function submitBuyerEval(event) {
+            event.preventDefault();
+            var booth = document.getElementById('buyerBooth').value;
+            var name = document.getElementById("sellerName1").value.trim();
+            var score = document.querySelector("input[name='sellerScore1']:checked").value;
+            sendToGoogleDatabase('buyer', [booth, currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
+            alert('제출 완료!'); exitSubPage();
+        }
+
+        function submitTeamEval(event) {
+            event.preventDefault();
+            var target = document.getElementById('teamTargetName').value.trim();
+            var score = document.querySelector("input[name='teamScore']:checked").value;
+            var reason = document.getElementById('teamReason').value.trim();
+            sendToGoogleDatabase('team', [currentSessionUser.classNum, currentSessionUser.name, target, score, reason, new Date().toLocaleTimeString()]);
+            alert('제출 완료!'); exitSubPage();
+        }
+
+        function submitSelfEval(event) {
+            event.preventDefault();
+            var score = document.querySelector("input[name='selfScore']:checked").value;
+            var reason = document.getElementById('selfReason').value.trim();
+            sendToGoogleDatabase('self', [currentSessionUser.classNum, currentSessionUser.name, currentSessionUser.name, score, reason, new Date().toLocaleTimeString()]);
+            alert('제출 완료!'); exitSubPage();
+        }
+
+        // 🔥 [신규 반영] 선생님이 점수 입력 후 반영 누르면 구글 시트로 강제 연동 업데이트
+        function saveStudentScore(key, classNum, num) {
+            var scoreVal = document.getElementById("score_input_" + key).value;
+            var feedbackVal = document.getElementById("feedback_input_" + key).value;
+            
+            // 데이터베이스로 채점 내역 즉시 전송
+            var payload = { type: 'scores_sync', data: [classNum, num, '', scoreVal, feedbackVal] };
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then(function(){
+                alert('수행 평가 점수와 피드백이 학생 디벗으로 실시간 공개 처리되었습니다!');
+                fetchAllDataFromGoogle();
+            });
+        }
+
+        function processGroupingForClass(records, targetClass) {
+            var groups = {};
+            for(var i=0; i<records.length; i++) {
+                var r = records[i];
+                if(parseInt(r[1]) !== parseInt(targetClass)) continue;
+                var targetName = r[3] || "미정";
+                if(!groups[targetName]) groups[targetName] = [];
+                groups[targetName].push(r);
+            }
+            return groups;
+        }
+
+        function renderAdminDashboard() {
+            var accountTbody = document.getElementById('adminUserAccountTable');
+            accountTbody.innerHTML = '';
+            var hasAccount = false;
+            
+            var accs = globalCloudDatabase.accounts;
+            for(var i=0; i<accs.length; i++) {
+                var u = accs[i]; // [0:반, 1:번호, 2:이름, 3:비밀번호, 4:점수, 5:피드백]
+                if(parseInt(u[0]) !== activeAccountClass) continue;
+                hasAccount = true;
+                var uniqueKey = u[0] + "_" + u[1];
+                accountTbody.innerHTML += '<tr>' +
+                    '<td>1학년 ' + u[0] + '반</td><td>' + u[1] + '번</td><td><strong>' + u[2] + '</strong></td><td style="color:#4c51bf;">' + u[3] + '</td>' +
+                    '<td><input type="text" style="width:65px; text-align:center;" id="score_input_' + uniqueKey + '" value="' + (u[4]||'') + '" placeholder="점수"></td>' +
+                    '<td><input type="text" id="feedback_input_' + uniqueKey + '" value="' + (u[5]||'') + '" placeholder="피드백 입력"></td>' +
+                    '<td><button class="btn-sm" style="background:var(--mint-color);" onclick="saveStudentScore(\'' + uniqueKey + '\',' + u[0] + ',' + u[1] + ')">반영</button></td>' +
+                '</tr>';
+            }
+            if(!hasAccount) accountTbody.innerHTML = '<tr><td colspan="7" style="color:#aaa;">가입 명부가 비어 있습니다.</td></tr>';
+
+            renderCloudGroupedView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, 1);
+            renderCloudGroupedView('groupedBuyerView', globalCloudDatabase.buyer, activeAccountClass, 2);
+            renderCloudGroupedView('groupedTeamView', globalCloudDatabase.team, activeAccountClass, 3);
+
+            var selfTbody = document.getElementById('flatSelfTableBody');
+            selfTbody.innerHTML = '';
+            var selves = globalCloudDatabase.self;
+            for(var j=0; j<selves.length; j++) {
+                var s = selves[j];
+                if(parseInt(s[0]) !== activeAccountClass) continue;
+                selfTbody.innerHTML += '<tr><td>1학년 ' + s[0] + '반</td><td>-</td><td><strong>' + s[2] + '</strong></td><td>' + s[3] + '</td><td style="text-align:left;">' + s[4] + '</td><td style="color:#aaa;">' + s[5] + '</td></tr>';
+            }
+        }
+
+        function renderCloudGroupedView(viewId, records, classNum, mode) {
+            var container = document.getElementById(viewId);
+            container.innerHTML = '';
+            var grouped = processGroupingForClass(records, classNum);
+            var hasData = false;
+
+            for(var targetName in grouped) {
+                hasData = true;
+                var list = grouped[targetName];
+                var html = '<div class="class-section" style="border-left: 5px solid var(--secondary-color);">' +
+                           '<p style="font-weight:bold; margin-bottom:6px;">🎯 대상자 성명: [ ' + targetName + ' ] 학생 평정</p>' +
+                           '<div class="table-wrapper"><table><tbody>';
+                
+                for(var k=0; k<list.length; k++) {
+                    var item = list[k];
+                    html += '<tr>';
+                    if(mode === 1) html += '<td>' + item[0] + '</td><td>' + item[2] + '</td><td><strong>' + item[4] + '</strong></td><td>' + item[5] + '</td>';
+                    else if(mode === 2) html += '<td>' + item[0] + '</td><td>' + item[2] + '</td><td><strong>' + item[3] + '</strong></td><td>' + item[4] + '</td>';
+                    else if(mode === 3) html += '<td>' + item[2] + '</td><td><strong>' + item[3] + '</strong></td><td style="text-align:left;">' + item[4] + '</td><td>' + item[5] + '</td>';
+                    html += '</tr>';
+                }
+                html += '</tbody></table></div></div>';
+                container.innerHTML += html;
+            }
+            if(!hasData) container.innerHTML = '<p style="color:#aaa; text-align:center;">데이터가 비어 있습니다.</p>';
+        }
+
+        function toggleSection(id) { var el = document.getElementById(id); if(el) el.classList.toggle('collapsed'); }
+        function goMainFromAdmin() { document.getElementById('masterAdminContainer').style.display = 'none'; switchPage('pageLogin'); }
+        function switchPage(pageId) {
+            var pages = ['pageLogin', 'pageMenu', 'pageSeller', 'pageBuyer', 'pageTeam', 'pageSelf', 'pageScore'];
+            for(var i=0; i<pages.length; i++) {
+                var el = document.getElementById(pages[i]);
+                if(el) el.style.display = (pages[i] === pageId) ? 'block' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>
