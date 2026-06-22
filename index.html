@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v21</title>
+    <title>지식시장 수행평가 종합 시스템 v22</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -18,9 +18,9 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; min-height: 100vh; }
 
-        .container { width: 100%; max-width: 820px; background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); position: relative; }
+        .container { width: 100%; max-width: 820px; background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); position: relative; margin-top: 20px; }
         h2 { text-align: center; margin-bottom: 20px; color: #5a6b7c; }
         h3 { margin-top: 25px; margin-bottom: 10px; color: #2d3748; border-left: 4px solid var(--secondary-color); padding-left: 8px; display: flex; justify-content: space-between; align-items: center; }
         
@@ -55,7 +55,22 @@
         .radio-options { display: flex; justify-content: space-between; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 6px; margin-bottom: 10px; }
         .radio-label { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; cursor: pointer; }
 
-        .admin-container { max-width: 1400px; display: none; background: #ffffff; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); margin: 20px auto; }
+        /* 🔥 [오류 수정] 최상위 레이어로 브라우저 창 전체 정중앙 고정(독립 레이아웃화) */
+        .admin-modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 500000; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        .modal-body { background: #fff; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); text-align: center; }
+
+        .admin-container { width: 100%; max-width: 1400px; display: none; background: #ffffff; padding: 30px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); margin-top: 20px; margin-bottom: 40px; }
         .table-wrapper { overflow-x: auto; margin-bottom: 15px; background: #fff; border-radius: 8px; border: 1px solid var(--border-color); }
         table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 1200px; }
         th, td { border: 1px solid var(--border-color); padding: 8px 6px; text-align: center; }
@@ -295,7 +310,6 @@
         </div>
     </div>
 
-    <!-- ================= [교사 전용 관제 대시보드] ================= -->
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
         <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료</p>
@@ -370,9 +384,6 @@
         <button class="btn-block btn-back" style="background:#4a5568; color:#fff;" onclick="goMainFromAdmin()">교사 관리 종료 (대문으로)</button>
     </div>
 
-    <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v21
-         ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz4hyf4LyyFGPPwr5Qv9otBDK0V2KbmjsM2BaPtxC0EG1PPky_UzUQO8bUd8gNSzpFQbw/exec";
 
@@ -431,7 +442,11 @@
             sendToGoogleDatabase('perms', [pSeller, pBuyer, pTeam, pSelf, pScore]);
         }
 
-        function openAdminModal() { document.getElementById('modalInputPw').value = ''; document.getElementById('customAdminModal').style.display = 'flex'; }
+        function openAdminModal() { 
+            document.getElementById('modalInputPw').value = ''; 
+            document.getElementById('customAdminModal').style.display = 'flex'; 
+            document.getElementById('modalInputPw').focus();
+        }
         function closeAdminModal() { document.getElementById('customAdminModal').style.display = 'none'; }
 
         function verifyAdminPassword() {
@@ -472,7 +487,7 @@
                 .then(function(res) { return res.json(); })
                 .then(function(cloudData) {
                     var accs = cloudData.accounts || [];
-                    var isDuplicate学번 = false;
+                    var isDuplicate학번 = false;
                     var isMatchedExistUser = false;
 
                     for(var i=0; i<accs.length; i++) {
@@ -635,21 +650,18 @@
             });
         }
 
-        // 🧠 [v21 핵심 수정] 유연한 유효반 추출 정규식 필터 탑재 (증발 버그 완전 진압)
         function processGroupingForClass(records, targetClass, mode) {
             var groups = {};
             for(var i=0; i<records.length; i++) {
                 var r = records[i];
                 if (!r || r.length < 3) continue;
                 
-                // r[1](반 필드) 혹은 r[2](evaluator 닉네임 필드)에서 가입 반을 지능형 스캔
                 var contextText = (r[2] || "").toString() + " " + (r[1] || "").toString();
                 var matchResult = contextText.match(/(\d+)반/);
                 var itemClass = matchResult ? parseInt(matchResult[1]) : parseInt(r[1]);
                 
                 if (isNaN(itemClass) || itemClass !== parseInt(targetClass)) continue;
                 
-                // 피평가 대상자 이름 가공 (mode 1: r[3], mode 2: r[2], mode 3: r[2])
                 var targetName = (mode === 1) ? (r[3] || "미정") : (r[2] || "미정");
                 targetName = targetName.toString().trim();
                 
