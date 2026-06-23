@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v28</title>
+    <title>지식시장 수행평가 종합 시스템 v29</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -395,10 +395,10 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v28
+                        JAVASCRIPT CORE ENGINE v29
          ============================================================= -->
     <script>
-        var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbya7F5MUvYZBWkE59JQsHFrAXwn3nv6TfPRz6A57aV0pQ9kjEis5Tq0X6WZJh2Y7Ey0bw/exec";
+        var WEB_APP_URL = https://script.google.com/macros/s/AKfycbzGQ-F-S7Du9GQUZLYFR4soSQN2GpZKzwXUlqD5ZIKlTxE44eTENYS8iw5VLUcvtGi1Og/exec";
 
         var currentSessionUser = null;
         var menuPermissions = { seller: true, buyer: true, team: true, self: true, score: true };
@@ -423,6 +423,7 @@
             });
         }
 
+        // 💡 [핵심 교정] 교사 대시보드 불러올 때도 문자열 변환 예외를 완전히 처리
         function fetchAllDataFromGoogle() {
             if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
             fetch(WEB_APP_URL + "?action=fetchAllData")
@@ -436,11 +437,11 @@
                     
                     if (cloudData.perms && cloudData.perms.length > 0) {
                         var p = cloudData.perms[0];
-                        document.getElementById('toggle_seller').checked = (p[0] === true || p[0] === 'true');
-                        document.getElementById('toggle_buyer').checked = (p[1] === true || p[1] === 'true');
-                        document.getElementById('toggle_team').checked = (p[2] === true || p[2] === 'true');
-                        document.getElementById('toggle_self').checked = (p[3] === true || p[3] === 'true');
-                        document.getElementById('toggle_score').checked = (p[4] === true || p[4] === 'true');
+                        document.getElementById('toggle_seller').checked = (p[0] === true || p[0] === 'true' || p[0] === 'TRUE');
+                        document.getElementById('toggle_buyer').checked = (p[1] === true || p[1] === 'true' || p[1] === 'TRUE');
+                        document.getElementById('toggle_team').checked = (p[2] === true || p[2] === 'true' || p[2] === 'TRUE');
+                        document.getElementById('toggle_self').checked = (p[3] === true || p[3] === 'true' || p[3] === 'TRUE');
+                        document.getElementById('toggle_score').checked = (p[4] === true || p[4] === 'true' || p[4] === 'TRUE');
                     }
                     renderAdminDashboard();
                 });
@@ -489,7 +490,6 @@
             renderAdminDashboard();
         }
 
-        // 🔥 [v28 버그 수정 클라이맥스] 학생 로그인 완료 시 실시간 잠금 권한 동기화 라인 완벽 복구
         function handleLogin() {
             var cls = document.getElementById('loginClass').value;
             var num = document.getElementById('loginNumber').value;
@@ -552,18 +552,17 @@
                             currentSessionUser.finalScore = res.finalScore;
                             currentSessionUser.feedback = res.feedback;
                             
-                            // 🚀 [핵심 교정] 백엔드에서 받아온 잠금 권한 배열 객체를 프론트 뷰에 실시간 강제 고정
-                            menuPermissions.seller = (res.perms[0] === true || res.perms[0] === 'true');
-                            menuPermissions.buyer = (res.perms[1] === true || res.perms[1] === 'true');
-                            menuPermissions.team = (res.perms[2] === true || res.perms[2] === 'true');
-                            menuPermissions.self = (res.perms[3] === true || res.perms[3] === 'true');
-                            menuPermissions.score = (res.perms[4] === true || res.perms[4] === 'true');
+                            // 💡 [핵심 교정] 대소문자 관계없이 문자열 판정으로 엄격한 통제 필터 작동
+                            menuPermissions.seller = (res.perms[0] === true || res.perms[0] === 'true' || res.perms[0] === 'TRUE');
+                            menuPermissions.buyer = (res.perms[1] === true || res.perms[1] === 'true' || res.perms[1] === 'TRUE');
+                            menuPermissions.team = (res.perms[2] === true || res.perms[2] === 'true' || res.perms[2] === 'TRUE');
+                            menuPermissions.self = (res.perms[3] === true || res.perms[3] === 'true' || res.perms[3] === 'TRUE');
+                            menuPermissions.score = (res.perms[4] === true || res.perms[4] === 'true' || res.perms[4] === 'TRUE');
                             
                             var menus = ['seller', 'buyer', 'team', 'self', 'score'];
                             menus.forEach(function(m){
                                 var el = document.getElementById("menu_" + m);
                                 if(el) {
-                                    // 권한이 false 이면 무조건 비활성화 클래스로 고정 차단
                                     el.className = menuPermissions[m] ? 'btn-menu' : 'btn-menu disabled';
                                 }
                             });
@@ -580,7 +579,6 @@
         }
 
         function enterMenu(menuType) {
-            // 🚀 [안전장치 레이어] 버튼 클릭 시 한 번 더 실시간 차단 검증
             if(!menuPermissions[menuType]) { 
                 alert('🔒 선생님이 아직 비활성화해 두신 메뉴이거나 마감된 평가 영역입니다.'); 
                 return; 
