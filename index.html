@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v25</title>
+    <title>지식시장 수행평가 종합 시스템 v26</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -124,7 +124,7 @@
                     <label>번호</label>
                     <select id="loginNumber" required>
                         <option value="">선택(번)</option>
-                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
+                        <option value="1">1번</option><option value="2">2반</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
                         <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
                         <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
                         <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
@@ -416,7 +416,6 @@
             });
         }
 
-        // 🔥 [v25 핵심 개조] 구글 시트에서 가져온 실제 스위치 원본값(true/false)을 매칭하여 실시간 동기화
         function fetchAllDataFromGoogle() {
             if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
             fetch(WEB_APP_URL + "?action=fetchAllData")
@@ -430,7 +429,6 @@
                     
                     if (cloudData.perms && cloudData.perms.length > 0) {
                         var p = cloudData.perms[0];
-                        // 재접속 및 새로고침 시 문자열 변환 예외처리 완벽 매칭
                         document.getElementById('toggle_seller').checked = (p[0] === true || p[0] === 'true');
                         document.getElementById('toggle_buyer').checked = (p[1] === true || p[1] === 'true');
                         document.getElementById('toggle_team').checked = (p[2] === true || p[2] === 'true');
@@ -504,13 +502,13 @@
                             if(u[2].trim() === name && u[3].toString().trim() === pw) {
                                 isMatchedExistUser = true;
                             } else {
-                                isDuplicate학번 = true;
+                                isDuplicate学번 = true;
                             }
                             break;
                         }
                     }
 
-                    if(isDuplicate학번) {
+                    if(isDuplicate学번) {
                         alert('❌ [가입 불가] 이미 다른 학생이 등록을 완료한 학번(반/번호)입니다.\n본인의 반, 번호가 맞는지 다시 한 번 확인해 주세요!');
                         loginBtn.innerText = "로그인 / 학생 등록하고 입장";
                         loginBtn.disabled = false;
@@ -871,7 +869,14 @@
         }
 
         function toggleSection(id) { var el = document.getElementById(id); if(el) el.classList.toggle('collapsed'); }
-        function goMainFromAdmin() { document.getElementById('masterAdminContainer').style.display = 'none'; switchPage('pageLogin'); }
+        
+        // ⚡ [v26 핵심 개조] 복귀 시 메인 컨테이너 프레임워크 자체를 재오픈하여 백화 차단
+        function goMainFromAdmin() { 
+            document.getElementById('masterAdminContainer').style.display = 'none'; 
+            document.getElementById('mainContainer').style.display = 'block'; 
+            switchPage('pageLogin'); 
+        }
+        
         function switchPage(pageId) {
             var pages = ['pageLogin', 'pageMenu', 'pageSeller', 'pageBuyer', 'pageTeam', 'pageSelf', 'pageScore'];
             for(var i=0; i<pages.length; i++) {
