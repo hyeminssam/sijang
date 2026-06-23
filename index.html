@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v22</title>
+    <title>지식시장 수행평가 종합 시스템 v23</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -55,7 +55,6 @@
         .radio-options { display: flex; justify-content: space-between; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 6px; margin-bottom: 10px; }
         .radio-label { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; cursor: pointer; }
 
-        /* 🔥 [오류 수정] 최상위 레이어로 브라우저 창 전체 정중앙 고정(독립 레이아웃화) */
         .admin-modal { 
             display: none; 
             position: fixed; 
@@ -125,7 +124,7 @@
                     <label>번호</label>
                     <select id="loginNumber" required>
                         <option value="">선택(번)</option>
-                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
+                        <option value="1">1번</option><option value="2">2반</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
                         <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
                         <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
                         <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
@@ -310,6 +309,7 @@
         </div>
     </div>
 
+    <!-- ================= [교사 전용 관제 대시보드] ================= -->
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
         <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료</p>
@@ -325,18 +325,22 @@
             <label><input type="checkbox" id="toggle_score" checked onchange="updateMenuControl()"> 5. 성적확인 서랍 오픈</label>
         </div>
 
+        <!-- 💾 일괄 저장 마스터 버튼 배치 -->
         <h3>👥 가입된 학생 명부 및 세부 채점 (40점 만점 자동 합산 엔진)
             <button class="btn-toggle-view" onclick="toggleSection('sec_accounts')">접기/펼치기</button>
         </h3>
         <div id="sec_accounts" class="section-content">
-            <div class="class-filter-buttons">
-                <button id="btn_account_1" class="btn-filter active" onclick="changeClassFilter('account', 1)">1반</button>
-                <button id="btn_account_2" class="btn-filter" onclick="changeClassFilter('account', 2)">2반</button>
-                <button id="btn_account_3" class="btn-filter" onclick="changeClassFilter('account', 3)">3반</button>
-                <button id="btn_account_4" class="btn-filter" onclick="changeClassFilter('account', 4)">4반</button>
-                <button id="btn_account_5" class="btn-filter" onclick="changeClassFilter('account', 5)">5반</button>
-                <button id="btn_account_6" class="btn-filter" onclick="changeClassFilter('account', 6)">6반</button>
-                <button id="btn_account_7" class="btn-filter" onclick="changeClassFilter('account', 7)">7반</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div class="class-filter-buttons" style="margin-bottom:0;">
+                    <button id="btn_account_1" class="btn-filter active" onclick="changeClassFilter('account', 1)">1반</button>
+                    <button id="btn_account_2" class="btn-filter" onclick="changeClassFilter('account', 2)">2반</button>
+                    <button id="btn_account_3" class="btn-filter" onclick="changeClassFilter('account', 3)">3반</button>
+                    <button id="btn_account_4" class="btn-filter" onclick="changeClassFilter('account', 4)">4반</button>
+                    <button id="btn_account_5" class="btn-filter" onclick="changeClassFilter('account', 5)">5반</button>
+                    <button id="btn_account_6" class="btn-filter" onclick="changeClassFilter('account', 6)">6반</button>
+                    <button id="btn_account_7" class="btn-filter" onclick="changeClassFilter('account', 7)">7반</button>
+                </div>
+                <button class="btn-block btn-submit" style="width: auto; margin-top:0; padding: 10px 24px; font-size:1.05rem; background-color:#3182ce; color:#fff;" onclick="saveAllClassScoresBatch()">💾 현재 반 성적 일괄 저장 및 반영</button>
             </div>
             <div class="table-wrapper">
                 <table>
@@ -344,7 +348,7 @@
                         <tr>
                             <th>학번/성명</th><th>지정 암호</th>
                             <th>자료(9)</th><th>질문(2)</th><th>판매(4)</th><th>구매(6)</th><th>성찰(2)</th><th>동료(5)</th><th>기본</th>
-                            <th>총점(40)</th><th>종합 피드백 입력</th><th>조작</th>
+                            <th>총점(40)</th><th>종합 피드백 입력</th>
                         </tr>
                     </thead>
                     <tbody id="adminUserAccountTable"></tbody>
@@ -384,8 +388,11 @@
         <button class="btn-block btn-back" style="background:#4a5568; color:#fff;" onclick="goMainFromAdmin()">교사 관리 종료 (대문으로)</button>
     </div>
 
+    <!-- =============================================================
+                        JAVASCRIPT CORE ENGINE v23
+         ============================================================= -->
     <script>
-        var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz4hyf4LyyFGPPwr5Qv9otBDK0V2KbmjsM2BaPtxC0EG1PPky_UzUQO8bUd8gNSzpFQbw/exec";
+        var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbya7F5MUvYZBWkE59JQsHFrAXwn3nv6TfPRz6A57aV0pQ9kjEis5Tq0X6WZJh2Y7Ey0bw/exec";
 
         var currentSessionUser = null;
         var menuPermissions = { seller: true, buyer: true, team: true, self: true, score: true };
@@ -625,27 +632,43 @@
             document.getElementById("sc_total_" + key).innerText = total + "점";
         }
 
-        function saveStudentScore(key, classNum, num) {
-            var m1 = document.getElementById("sc_mat_" + key).value || '0';
-            var m2 = document.getElementById("sc_que_" + key).value || '0';
-            var m3 = document.getElementById("sc_sel_" + key).value || '0';
-            var m4 = document.getElementById("sc_buy_" + key).value || '0';
-            var m5 = document.getElementById("sc_slf_" + key).value || '0';
-            var m6 = document.getElementById("sc_tem_" + key).value || '0';
-            var totalText = document.getElementById("sc_total_" + key).innerText.replace("점", "");
+        // 💾 [v23 핵심개조] 한 명씩이 아니라 현재 반 전체 데이터를 수집하여 일괄 한방 전송 알고리즘
+        function saveAllClassScoresBatch() {
+            var activeRows = [];
+            var accs = globalCloudDatabase.accounts;
             
-            var rawFeedback = document.getElementById("feedback_input_" + key).value;
-            var structuredScoreString = "[" + m1 + "/" + m2 + "/" + m3 + "/" + m4 + "/" + m5 + "/" + m6 + "]";
+            for(var i=0; i<accs.length; i++) {
+                var u = accs[i];
+                if(parseInt(u[0]) !== activeAccountClass) continue;
+                
+                var uniqueKey = u[0] + "_" + u[1];
+                var m1 = document.getElementById("sc_mat_" + uniqueKey).value || '0';
+                var m2 = document.getElementById("sc_que_" + uniqueKey).value || '0';
+                var m3 = document.getElementById("sc_sel_" + uniqueKey).value || '0';
+                var m4 = document.getElementById("sc_buy_" + uniqueKey).value || '0';
+                var m5 = document.getElementById("sc_slf_" + uniqueKey).value || '0';
+                var m6 = document.getElementById("sc_tem_" + uniqueKey).value || '0';
+                var totalText = document.getElementById("sc_total_" + uniqueKey).innerText.replace("점", "");
+                var feedbackText = document.getElementById("feedback_input_" + uniqueKey).value;
+                
+                // 일괄 가공 데이터 패키징 배열화
+                activeRows.push([
+                    u[0], u[1], m1, m2, m3, m4, m5, m6, 14, totalText, feedbackText
+                ]);
+            }
             
-            var payload = { type: 'scores_sync', data: [classNum, num, '', totalText, structuredScoreString + " " + rawFeedback] };
+            if(activeRows.length === 0) { alert('저장할 학생 데이터가 없습니다.'); return; }
             
+            if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
+            
+            // 일괄 전송 파이프라인 작동
             fetch(WEB_APP_URL, {
                 method: "POST",
                 mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ type: 'batch_scores_sync', data: activeRows })
             }).then(function(){
-                alert('세부 합산 점수 및 피드백이 실시간 저장 완료되었습니다.');
+                alert('👍 ' + activeAccountClass + '반 전체 학생의 영역별 점수 및 피드백이 스프레드시트에 일괄 업로드 완료되었습니다!');
                 fetchAllDataFromGoogle(); 
             });
         }
@@ -701,36 +724,31 @@
                 hasAccount = true;
                 var uniqueKey = u[0] + "_" + u[1];
                 
-                var cellValues = ["0","0","0","0","0","0"];
-                var cleanFeedback = u[5] || "";
-                if(cleanFeedback.indexOf("[") === 0 && cleanFeedback.indexOf("]") > 0) {
-                    var closeIdx = cleanFeedback.indexOf("]");
-                    var corePart = cleanFeedback.substring(1, closeIdx);
-                    cellValues = corePart.split("/");
-                    cleanFeedback = cleanFeedback.substring(closeIdx + 1).trim();
-                } else if(u[4]) {
-                    cellValues[0] = u[4];
-                }
-
-                var baseScore = 14;
-                var loadedTotal = parseFloat(u[4]) || (parseFloat(cellValues[0])+parseFloat(cellValues[1])+parseFloat(cellValues[2])+parseFloat(cellValues[3])+parseFloat(cellValues[4])+parseFloat(cellValues[5])+baseScore);
+                // accounts 시트 5번째 열부터 각각의 영역별 개별 데이터 맵 복구 파싱
+                var m1 = u[4] || "0";
+                var m2 = u[5] || "0";
+                var m3 = u[6] || "0";
+                var m4 = u[7] || "0";
+                var m5 = u[8] || "0";
+                var m6 = u[9] || "0";
+                var loadedTotal = u[10] || "14";
+                var cleanFeedback = u[11] || "";
 
                 accountTbody.innerHTML += '<tr>' +
                     '<td><strong>' + u[1] + '번 ' + u[2] + '</strong></td>' +
                     '<td style="color:#94a3b8;">' + u[3] + '</td>' +
-                    '<td><input type="number" class="score-input-box" id="sc_mat_' + uniqueKey + '" value="' + cellValues[0] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
-                    '<td><input type="number" class="score-input-box" id="sc_que_' + uniqueKey + '" value="' + cellValues[1] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
-                    '<td><input type="number" class="score-input-box" id="sc_sel_' + uniqueKey + '" value="' + cellValues[2] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
-                    '<td><input type="number" class="score-input-box" id="sc_buy_' + uniqueKey + '" value="' + cellValues[3] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
-                    '<td><input type="number" class="score-input-box" id="sc_slf_' + uniqueKey + '" value="' + cellValues[4] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
-                    '<td><input type="number" class="score-input-box" id="sc_tem_' + uniqueKey + '" value="' + cellValues[5] + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
-                    '<td style="color:#aaa;">' + baseScore + '</td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_mat_' + uniqueKey + '" value="' + m1 + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_que_' + uniqueKey + '" value="' + m2 + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_sel_' + uniqueKey + '" value="' + m3 + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_buy_' + uniqueKey + '" value="' + m4 + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_slf_' + uniqueKey + '" value="' + m5 + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td><input type="number" class="score-input-box" id="sc_tem_' + uniqueKey + '" value="' + m6 + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
+                    '<td style="color:#aaa;">14</td>' +
                     '<td><span class="total-score-text" id="sc_total_' + uniqueKey + '">' + loadedTotal + '점</span></td>' +
-                    '<td><input type="text" style="width:180px;" id="feedback_input_' + uniqueKey + '" value="' + cleanFeedback + '" placeholder="코멘트 피드백 입력"></td>' +
-                    '<td><button class="btn-sm" style="background:var(--mint-color);" onclick="saveStudentScore(\'' + uniqueKey + '\',' + u[0] + ',' + u[1] + ')">반영</button></td>' +
+                    '<td><input type="text" style="width:250px;" id="feedback_input_' + uniqueKey + '" value="' + cleanFeedback + '" placeholder="코멘트 피드백 입력"></td>' +
                 '</tr>';
             }
-            if(!hasAccount) accountTbody.innerHTML = '<tr><td colspan="12" style="color:#aaa; padding:20px;">가입 명부가 비어 있습니다.</td></tr>';
+            if(!hasAccount) accountTbody.innerHTML = '<tr><td colspan="11" style="color:#aaa; padding:20px;">가입 명부가 비어 있습니다.</td></tr>';
 
             renderCloudGroupedView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, 1, stats.seller);
             renderCloudGroupedView('groupedBuyerView', globalCloudDatabase.buyer, activeAccountClass, 2, stats.buyer);
