@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v26</title>
+    <title>지식시장 수행평가 종합 시스템 v27</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -79,12 +79,13 @@
         .total-score-text { font-weight: bold; color: #2c5282; font-size: 0.95rem; }
 
         .class-section { border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-top: 10px; margin-bottom: 15px; background: #fff; }
-        .toggle-panel { display: flex; flex-wrap: wrap; gap: 15px; background: #edf2f7; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .toggle-panel { display: flex; flex-wrap: wrap; gap: 15px; background: #edf2f7; padding: 15px; border-radius: 8px; margin-bottom: 12px; width: 100%; }
 
         .class-filter-buttons { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
         .btn-filter { padding: 6px 14px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
         .btn-filter.active { background: #4c51bf; color: #fff; border-color: #4c51bf; }
 
+        /* 🔥 최초 접힘 상태를 처리하기 위한 컴포넌트 클래스 디자인 */
         .section-content { display: block; margin-top: 10px; }
         .section-content.collapsed { display: none; }
         .btn-toggle-view { background: #e2e8f0; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; color:#4a5568; }
@@ -309,25 +310,31 @@
         </div>
     </div>
 
+    <!-- ================= [교사 전용 관제 대시보드] ================= -->
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
         <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료</p>
         
+        <!-- 🔥 1. 메뉴 활성화 스위치 하단 반영 버튼 추가 및 기본 접힘 상태 설계 -->
         <h3>⚙️ 학생단 접속 메뉴 활성화 스위치 (실시간 제어)
             <button class="btn-toggle-view" onclick="toggleSection('sec_switch')">접기/펼치기</button>
         </h3>
-        <div id="sec_switch" class="section-content toggle-panel">
-            <label><input type="checkbox" id="toggle_seller" checked onchange="updateMenuControl()"> 1. 판매자평가 오픈</label>
-            <label><input type="checkbox" id="toggle_buyer" checked onchange="updateMenuControl()"> 2. 구매자평가 오픈</label>
-            <label><input type="checkbox" id="toggle_team" checked onchange="updateMenuControl()"> 3. 동료평가 오픈</label>
-            <label><input type="checkbox" id="toggle_self" checked onchange="updateMenuControl()"> 4. 자기평가 오픈</label>
-            <label><input type="checkbox" id="toggle_score" checked onchange="updateMenuControl()"> 5. 성적확인 서랍 오픈</label>
+        <div id="sec_switch" class="section-content collapsed">
+            <div class="toggle-panel">
+                <label><input type="checkbox" id="toggle_seller" checked> 1. 판매자평가 오픈</label>
+                <label><input type="checkbox" id="toggle_buyer" checked> 2. 구매자평가 오픈</label>
+                <label><input type="checkbox" id="toggle_team" checked> 3. 동료평가 오픈</label>
+                <label><input type="checkbox" id="toggle_self" checked> 4. 자기평가 오픈</label>
+                <label><input type="checkbox" id="toggle_score" checked> 5. 성적확인 서랍 오픈</label>
+            </div>
+            <button class="btn-block btn-submit" style="width: 100%; margin-top:5px; padding: 10px; font-size:0.92rem; background-color:#b39eb5; color:#fff;" onclick="updateMenuControlBatch()">💾 스위치 상태 저장 및 학생단 일괄 반영</button>
         </div>
 
+        <!-- 🔥 2. 명부 탭 최초 진입 시 접힘(collapsed) 처리 -->
         <h3>👥 가입된 학생 명부 및 세부 채점 (40점 만점 자동 합산 엔진)
             <button class="btn-toggle-view" onclick="toggleSection('sec_accounts')">접기/펼치기</button>
         </h3>
-        <div id="sec_accounts" class="section-content">
+        <div id="sec_accounts" class="section-content collapsed">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                 <div class="class-filter-buttons" style="margin-bottom:0;">
                     <button id="btn_account_1" class="btn-filter active" onclick="changeClassFilter('account', 1)">1반</button>
@@ -358,25 +365,26 @@
             </div>
         </div>
 
-        <h3>📊 1. 구매자 태도 분석 리포트 (교사용 평균 환산 포함)
+        <!-- 🔥 3. 리포트 탭들도 최초 진입 시 접힘(collapsed) 처리 -->
+        <h3>📊 1. 구매자 태도 분석 리포트
             <button class="btn-toggle-view" onclick="toggleSection('sec_report1')">접기/펼치기</button>
         </h3>
-        <div id="sec_report1" class="section-content"><div id="groupedSellerView"></div></div>
+        <div id="sec_report1" class="section-content collapsed"><div id="groupedSellerView"></div></div>
 
-        <h3>📊 2. 판매자 발표 분석 리포트 (교사용 평균 환산 포함)
+        <h3>📊 2. 판매자 발표 분석 리포트
             <button class="btn-toggle-view" onclick="toggleSection('sec_report2')">접기/펼치기</button>
         </h3>
-        <div id="sec_report2" class="section-content"><div id="groupedBuyerView"></div></div>
+        <div id="sec_report2" class="section-content collapsed"><div id="groupedBuyerView"></div></div>
 
-        <h3>📊 3. 조원 동료 상호 평가 사유 리포트 (교사용 평균 환산 포함)
+        <h3>📊 3. 조원 동료 상호 평가 사유 리포트
             <button class="btn-toggle-view" onclick="toggleSection('sec_report3')">접기/펼치기</button>
         </h3>
-        <div id="sec_report3" class="section-content"><div id="groupedTeamView"></div></div>
+        <div id="sec_report3" class="section-content collapsed"><div id="groupedTeamView"></div></div>
 
         <h3>📊 4. 학생별 자기 평가 성찰 리포트
             <button class="btn-toggle-view" onclick="toggleSection('sec_report4')">접기/펼치기</button>
         </h3>
-        <div id="sec_report4" class="section-content">
+        <div id="sec_report4" class="section-content collapsed">
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -390,6 +398,9 @@
         <button class="btn-block btn-back" style="background:#4a5568; color:#fff;" onclick="goMainFromAdmin()">교사 관리 종료 (대문으로)</button>
     </div>
 
+    <!-- =============================================================
+                        JAVASCRIPT CORE ENGINE v27
+         ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbya7F5MUvYZBWkE59JQsHFrAXwn3nv6TfPRz6A57aV0pQ9kjEis5Tq0X6WZJh2Y7Ey0bw/exec";
 
@@ -439,13 +450,23 @@
                 });
         }
 
-        function updateMenuControl() {
+        // 🔥 버튼 클릭 시에만 구글 시트에 일괄 저장 및 반영하도록 구조 변경
+        function updateMenuControlBatch() {
             var pSeller = document.getElementById('toggle_seller').checked;
             var pBuyer = document.getElementById('toggle_buyer').checked;
             var pTeam = document.getElementById('toggle_team').checked;
             var pSelf = document.getElementById('toggle_self').checked;
             var pScore = document.getElementById('toggle_score').checked;
-            sendToGoogleDatabase('perms', [pSeller, pBuyer, pTeam, pSelf, pScore]);
+            
+            if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: 'perms', data: [pSeller, pBuyer, pTeam, pSelf, pScore] })
+            }).then(function(){
+                alert('⚙️ 학생 접속 제어 스위치 상태가 데이터베이스에 최종 저장 및 반영되었습니다.');
+            });
         }
 
         function openAdminModal() { 
@@ -473,6 +494,7 @@
             renderAdminDashboard();
         }
 
+        // 🔥 [버그 수정] 극단적으로 안전한 타입 트래킹 알고리즘 적용 (공백, 대소문자, 정수 타입 완벽 대조)
         function handleLogin() {
             var cls = document.getElementById('loginClass').value;
             var num = document.getElementById('loginNumber').value;
@@ -498,18 +520,27 @@
 
                     for(var i=0; i<accs.length; i++) {
                         var u = accs[i];
-                        if(parseInt(u[0]) === parseInt(cls) && parseInt(u[1]) === parseInt(num)) {
-                            if(u[2].trim() === name && u[3].toString().trim() === pw) {
+                        if(!u || u.length < 2) continue;
+                        
+                        // 구글 시트 데이터 공백 제거 및 절대 정수화
+                        var sheetClass = parseInt(u[0]);
+                        var sheetNum = parseInt(u[1]);
+                        var sheetName = u[2] ? u[2].toString().trim() : "";
+                        var sheetPw = u[3] ? u[3].toString().trim() : "";
+
+                        if(sheetClass === parseInt(cls) && sheetNum === parseInt(num)) {
+                            // 학번이 일치할 때, 이름과 비번이 완벽하게 일치하는지 확인
+                            if(sheetName === name && sheetPw === pw) {
                                 isMatchedExistUser = true;
                             } else {
-                                isDuplicate学번 = true;
+                                isDuplicate학번 = true;
                             }
                             break;
                         }
                     }
 
-                    if(isDuplicate学번) {
-                        alert('❌ [가입 불가] 이미 다른 학생이 등록을 완료한 학번(반/번호)입니다.\n본인의 반, 번호가 맞는지 다시 한 번 확인해 주세요!');
+                    if(isDuplicate학번) {
+                        alert('❌ [가입 불가] 이미 다른 학생이 등록을 완료한 학번(반/번호)입니다.\n이름이나 비밀번호가 오타가 났는지 확인해 주세요!');
                         loginBtn.innerText = "로그인 / 학생 등록하고 입장";
                         loginBtn.disabled = false;
                         return;
@@ -517,7 +548,7 @@
 
                     currentSessionUser = { classNum: parseInt(cls), number: parseInt(num), name: name };
                     if(!isMatchedExistUser) {
-                        sendToGoogleDatabase('accounts', [parseInt(cls), parseInt(num), name, pw, '', '']);
+                        sendToGoogleDatabase('accounts', [parseInt(cls), parseInt(num), name, pw, '0', '0', '0', '0', '0', '0', '14', '']);
                     }
 
                     document.getElementById('displayUserInfo').innerText = cls + "반 " + num + "번 " + name + " 학생";
@@ -870,7 +901,6 @@
 
         function toggleSection(id) { var el = document.getElementById(id); if(el) el.classList.toggle('collapsed'); }
         
-        // ⚡ [v26 핵심 개조] 복귀 시 메인 컨테이너 프레임워크 자체를 재오픈하여 백화 차단
         function goMainFromAdmin() { 
             document.getElementById('masterAdminContainer').style.display = 'none'; 
             document.getElementById('mainContainer').style.display = 'block'; 
