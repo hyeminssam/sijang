@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v24</title>
+    <title>지식시장 수행평가 종합 시스템 v25</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -416,6 +416,7 @@
             });
         }
 
+        // 🔥 [v25 핵심 개조] 구글 시트에서 가져온 실제 스위치 원본값(true/false)을 매칭하여 실시간 동기화
         function fetchAllDataFromGoogle() {
             if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
             fetch(WEB_APP_URL + "?action=fetchAllData")
@@ -429,6 +430,7 @@
                     
                     if (cloudData.perms && cloudData.perms.length > 0) {
                         var p = cloudData.perms[0];
+                        // 재접속 및 새로고침 시 문자열 변환 예외처리 완벽 매칭
                         document.getElementById('toggle_seller').checked = (p[0] === true || p[0] === 'true');
                         document.getElementById('toggle_buyer').checked = (p[1] === true || p[1] === 'true');
                         document.getElementById('toggle_team').checked = (p[2] === true || p[2] === 'true');
@@ -493,7 +495,7 @@
                 .then(function(res) { return res.json(); })
                 .then(function(cloudData) {
                     var accs = cloudData.accounts || [];
-                    var isDuplicate学번 = false;
+                    var isDuplicate학번 = false;
                     var isMatchedExistUser = false;
 
                     for(var i=0; i<accs.length; i++) {
@@ -502,13 +504,13 @@
                             if(u[2].trim() === name && u[3].toString().trim() === pw) {
                                 isMatchedExistUser = true;
                             } else {
-                                isDuplicate学번 = true;
+                                isDuplicate학번 = true;
                             }
                             break;
                         }
                     }
 
-                    if(isDuplicate学번) {
+                    if(isDuplicate학번) {
                         alert('❌ [가입 불가] 이미 다른 학생이 등록을 완료한 학번(반/번호)입니다.\n본인의 반, 번호가 맞는지 다시 한 번 확인해 주세요!');
                         loginBtn.innerText = "로그인 / 학생 등록하고 입장";
                         loginBtn.disabled = false;
@@ -666,7 +668,6 @@
             });
         }
 
-        // 🔥 [v24 마스터 알고리즘] 전반 번호순 정렬 및 판매자/구매자/동료평가 환산 평균 일괄 다운로드 엔진
         function downloadAllClassAveragesCSV() {
             var stats = { seller: {}, buyer: {}, team: {} };
             
@@ -689,7 +690,6 @@
             var accs = globalCloudDatabase.accounts;
             if(accs.length === 0) { alert("가입된 학생 명부 데이터가 없습니다."); return; }
 
-            // 1. 학급별(반별) 버킷 분할 정렬 전처리
             var classBuckets = {};
             for(var i=0; i<7; i++) { classBuckets[i+1] = []; }
 
@@ -699,7 +699,6 @@
                 var name = u[2] ? u[2].toString().trim() : "";
                 
                 if(classBuckets[cNum]) {
-                    // 개인별 평균 가공 계산
                     var sArr = stats.seller[name] || [];
                     var bArr = stats.buyer[name] || [];
                     var tArr = stats.team[name] || [];
@@ -718,12 +717,9 @@
                 }
             });
 
-            // 2. 통합 스프레드시트 텍스트(CSV 호환 데이터 스트림) 작성 및 번호순 버블/퀵 솔팅 수행
-            var csvContent = "\ufeff"; // Excel 한글 깨짐 방지 BOM 삽입
-            
+            var csvContent = "\ufeff"; 
             for(var c=1; c<=7; c++) {
                 var currentList = classBuckets[c];
-                // ⚡ 번호 기준 오름차순 순차 정렬 규칙 적용
                 currentList.sort(function(a, b){ return a.number - b.number; });
 
                 csvContent += "=== 1학년 " + c + "반 상호평가 환산 정량 통계 리포트 ===\n";
@@ -736,10 +732,9 @@
                         csvContent += row.number + "," + row.name + "," + row.sellerAvg + "," + row.buyerAvg + "," + row.teamAvg + "\n";
                     });
                 }
-                csvContent += "\n\n"; // 반별 구분을 위한 빈 칸 확보
+                csvContent += "\n\n"; 
             }
 
-            // 3. 브라우저 메모리 가상 파일 트리거 다운로드
             var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             var link = document.createElement("a");
             var url = URL.createObjectURL(blob);
