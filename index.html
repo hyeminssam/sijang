@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v23</title>
+    <title>지식시장 수행평가 종합 시스템 v24</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -124,7 +124,7 @@
                     <label>번호</label>
                     <select id="loginNumber" required>
                         <option value="">선택(번)</option>
-                        <option value="1">1번</option><option value="2">2반</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
+                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
                         <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
                         <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
                         <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
@@ -309,7 +309,6 @@
         </div>
     </div>
 
-    <!-- ================= [교사 전용 관제 대시보드] ================= -->
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
         <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료</p>
@@ -325,12 +324,11 @@
             <label><input type="checkbox" id="toggle_score" checked onchange="updateMenuControl()"> 5. 성적확인 서랍 오픈</label>
         </div>
 
-        <!-- 💾 일괄 저장 마스터 버튼 배치 -->
         <h3>👥 가입된 학생 명부 및 세부 채점 (40점 만점 자동 합산 엔진)
             <button class="btn-toggle-view" onclick="toggleSection('sec_accounts')">접기/펼치기</button>
         </h3>
         <div id="sec_accounts" class="section-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                 <div class="class-filter-buttons" style="margin-bottom:0;">
                     <button id="btn_account_1" class="btn-filter active" onclick="changeClassFilter('account', 1)">1반</button>
                     <button id="btn_account_2" class="btn-filter" onclick="changeClassFilter('account', 2)">2반</button>
@@ -340,7 +338,11 @@
                     <button id="btn_account_6" class="btn-filter" onclick="changeClassFilter('account', 6)">6반</button>
                     <button id="btn_account_7" class="btn-filter" onclick="changeClassFilter('account', 7)">7반</button>
                 </div>
-                <button class="btn-block btn-submit" style="width: auto; margin-top:0; padding: 10px 24px; font-size:1.05rem; background-color:#3182ce; color:#fff;" onclick="saveAllClassScoresBatch()">💾 현재 반 성적 일괄 저장 및 반영</button>
+                
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-block btn-submit" style="width: auto; margin-top:0; padding: 10px 16px; font-size:0.9rem; background-color:#2b6cb0; color:#fff;" onclick="downloadAllClassAveragesCSV()">📊 반별 상호평가 평균 다운로드</button>
+                    <button class="btn-block btn-submit" style="width: auto; margin-top:0; padding: 10px 20px; font-size:0.9rem; background-color:#3182ce; color:#fff;" onclick="saveAllClassScoresBatch()">💾 현재 반 성적 일괄 저장 및 반영</button>
+                </div>
             </div>
             <div class="table-wrapper">
                 <table>
@@ -388,9 +390,6 @@
         <button class="btn-block btn-back" style="background:#4a5568; color:#fff;" onclick="goMainFromAdmin()">교사 관리 종료 (대문으로)</button>
     </div>
 
-    <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v23
-         ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbya7F5MUvYZBWkE59JQsHFrAXwn3nv6TfPRz6A57aV0pQ9kjEis5Tq0X6WZJh2Y7Ey0bw/exec";
 
@@ -494,7 +493,7 @@
                 .then(function(res) { return res.json(); })
                 .then(function(cloudData) {
                     var accs = cloudData.accounts || [];
-                    var isDuplicate학번 = false;
+                    var isDuplicate学번 = false;
                     var isMatchedExistUser = false;
 
                     for(var i=0; i<accs.length; i++) {
@@ -632,11 +631,9 @@
             document.getElementById("sc_total_" + key).innerText = total + "점";
         }
 
-        // 💾 [v23 핵심개조] 한 명씩이 아니라 현재 반 전체 데이터를 수집하여 일괄 한방 전송 알고리즘
         function saveAllClassScoresBatch() {
             var activeRows = [];
             var accs = globalCloudDatabase.accounts;
-            
             for(var i=0; i<accs.length; i++) {
                 var u = accs[i];
                 if(parseInt(u[0]) !== activeAccountClass) continue;
@@ -651,17 +648,13 @@
                 var totalText = document.getElementById("sc_total_" + uniqueKey).innerText.replace("점", "");
                 var feedbackText = document.getElementById("feedback_input_" + uniqueKey).value;
                 
-                // 일괄 가공 데이터 패키징 배열화
                 activeRows.push([
                     u[0], u[1], m1, m2, m3, m4, m5, m6, 14, totalText, feedbackText
                 ]);
             }
-            
             if(activeRows.length === 0) { alert('저장할 학생 데이터가 없습니다.'); return; }
-            
             if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
             
-            // 일괄 전송 파이프라인 작동
             fetch(WEB_APP_URL, {
                 method: "POST",
                 mode: "no-cors",
@@ -671,6 +664,91 @@
                 alert('👍 ' + activeAccountClass + '반 전체 학생의 영역별 점수 및 피드백이 스프레드시트에 일괄 업로드 완료되었습니다!');
                 fetchAllDataFromGoogle(); 
             });
+        }
+
+        // 🔥 [v24 마스터 알고리즘] 전반 번호순 정렬 및 판매자/구매자/동료평가 환산 평균 일괄 다운로드 엔진
+        function downloadAllClassAveragesCSV() {
+            var stats = { seller: {}, buyer: {}, team: {} };
+            
+            globalCloudDatabase.seller.forEach(function(r){
+                var name = r[3]; if(!name) return; name = name.toString().trim();
+                if(!stats.seller[name]) stats.seller[name] = [];
+                if(scoreMap[r[4]]) stats.seller[name].push(scoreMap[r[4]]);
+            });
+            globalCloudDatabase.buyer.forEach(function(r){
+                var name = r[2]; if(!name) return; name = name.toString().trim();
+                if(!stats.buyer[name]) stats.buyer[name] = [];
+                if(scoreMap[r[3]]) stats.buyer[name].push(scoreMap[r[3]]);
+            });
+            globalCloudDatabase.team.forEach(function(r){
+                var name = r[2]; if(!name) return; name = name.toString().trim();
+                if(!stats.team[name]) stats.team[name] = [];
+                if(scoreMap[r[3]]) stats.team[name].push(scoreMap[r[3]]);
+            });
+
+            var accs = globalCloudDatabase.accounts;
+            if(accs.length === 0) { alert("가입된 학생 명부 데이터가 없습니다."); return; }
+
+            // 1. 학급별(반별) 버킷 분할 정렬 전처리
+            var classBuckets = {};
+            for(var i=0; i<7; i++) { classBuckets[i+1] = []; }
+
+            accs.forEach(function(u){
+                var cNum = parseInt(u[0]);
+                var sNum = parseInt(u[1]);
+                var name = u[2] ? u[2].toString().trim() : "";
+                
+                if(classBuckets[cNum]) {
+                    // 개인별 평균 가공 계산
+                    var sArr = stats.seller[name] || [];
+                    var bArr = stats.buyer[name] || [];
+                    var tArr = stats.team[name] || [];
+
+                    var sAvg = sArr.length > 0 ? (sArr.reduce((a,b)=>a+b,0)/sArr.length).toFixed(2) : "0.00";
+                    var bAvg = bArr.length > 0 ? (bArr.reduce((a,b)=>a+b,0)/bArr.length).toFixed(2) : "0.00";
+                    var tAvg = tArr.length > 0 ? (tArr.reduce((a,b)=>a+b,0)/tArr.length).toFixed(2) : "0.00";
+
+                    classBuckets[cNum].push({
+                        number: sNum,
+                        name: name,
+                        sellerAvg: sAvg,
+                        buyerAvg: bAvg,
+                        teamAvg: tAvg
+                    });
+                }
+            });
+
+            // 2. 통합 스프레드시트 텍스트(CSV 호환 데이터 스트림) 작성 및 번호순 버블/퀵 솔팅 수행
+            var csvContent = "\ufeff"; // Excel 한글 깨짐 방지 BOM 삽입
+            
+            for(var c=1; c<=7; c++) {
+                var currentList = classBuckets[c];
+                // ⚡ 번호 기준 오름차순 순차 정렬 규칙 적용
+                currentList.sort(function(a, b){ return a.number - b.number; });
+
+                csvContent += "=== 1학년 " + c + "반 상호평가 환산 정량 통계 리포트 ===\n";
+                csvContent += "번호,성명,판매자 점수 평균(5점만점),구매자 점수 평균(5점만점),동료 조원평가 평균(5점만점)\n";
+
+                if(currentList.length === 0) {
+                    csvContent += "등록된 학생이 없습니다.,,,,\n";
+                } else {
+                    currentList.forEach(function(row){
+                        csvContent += row.number + "," + row.name + "," + row.sellerAvg + "," + row.buyerAvg + "," + row.teamAvg + "\n";
+                    });
+                }
+                csvContent += "\n\n"; // 반별 구분을 위한 빈 칸 확보
+            }
+
+            // 3. 브라우저 메모리 가상 파일 트리거 다운로드
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement("a");
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "지식시장_반별_상호평가_평균점수_명부_정렬판.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function processGroupingForClass(records, targetClass, mode) {
@@ -724,7 +802,6 @@
                 hasAccount = true;
                 var uniqueKey = u[0] + "_" + u[1];
                 
-                // accounts 시트 5번째 열부터 각각의 영역별 개별 데이터 맵 복구 파싱
                 var m1 = u[4] || "0";
                 var m2 = u[5] || "0";
                 var m3 = u[6] || "0";
