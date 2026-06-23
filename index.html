@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v27</title>
+    <title>지식시장 수행평가 종합 시스템 v28</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -85,7 +85,6 @@
         .btn-filter { padding: 6px 14px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
         .btn-filter.active { background: #4c51bf; color: #fff; border-color: #4c51bf; }
 
-        /* 🔥 최초 접힘 상태를 처리하기 위한 컴포넌트 클래스 디자인 */
         .section-content { display: block; margin-top: 10px; }
         .section-content.collapsed { display: none; }
         .btn-toggle-view { background: #e2e8f0; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; color:#4a5568; }
@@ -315,7 +314,6 @@
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
         <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료</p>
         
-        <!-- 🔥 1. 메뉴 활성화 스위치 하단 반영 버튼 추가 및 기본 접힘 상태 설계 -->
         <h3>⚙️ 학생단 접속 메뉴 활성화 스위치 (실시간 제어)
             <button class="btn-toggle-view" onclick="toggleSection('sec_switch')">접기/펼치기</button>
         </h3>
@@ -330,7 +328,6 @@
             <button class="btn-block btn-submit" style="width: 100%; margin-top:5px; padding: 10px; font-size:0.92rem; background-color:#b39eb5; color:#fff;" onclick="updateMenuControlBatch()">💾 스위치 상태 저장 및 학생단 일괄 반영</button>
         </div>
 
-        <!-- 🔥 2. 명부 탭 최초 진입 시 접힘(collapsed) 처리 -->
         <h3>👥 가입된 학생 명부 및 세부 채점 (40점 만점 자동 합산 엔진)
             <button class="btn-toggle-view" onclick="toggleSection('sec_accounts')">접기/펼치기</button>
         </h3>
@@ -365,7 +362,6 @@
             </div>
         </div>
 
-        <!-- 🔥 3. 리포트 탭들도 최초 진입 시 접힘(collapsed) 처리 -->
         <h3>📊 1. 구매자 태도 분석 리포트
             <button class="btn-toggle-view" onclick="toggleSection('sec_report1')">접기/펼치기</button>
         </h3>
@@ -399,7 +395,7 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v27
+                        JAVASCRIPT CORE ENGINE v28
          ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbya7F5MUvYZBWkE59JQsHFrAXwn3nv6TfPRz6A57aV0pQ9kjEis5Tq0X6WZJh2Y7Ey0bw/exec";
@@ -450,7 +446,6 @@
                 });
         }
 
-        // 🔥 버튼 클릭 시에만 구글 시트에 일괄 저장 및 반영하도록 구조 변경
         function updateMenuControlBatch() {
             var pSeller = document.getElementById('toggle_seller').checked;
             var pBuyer = document.getElementById('toggle_buyer').checked;
@@ -494,7 +489,7 @@
             renderAdminDashboard();
         }
 
-        // 🔥 [버그 수정] 극단적으로 안전한 타입 트래킹 알고리즘 적용 (공백, 대소문자, 정수 타입 완벽 대조)
+        // 🔥 [v28 버그 수정 클라이맥스] 학생 로그인 완료 시 실시간 잠금 권한 동기화 라인 완벽 복구
         function handleLogin() {
             var cls = document.getElementById('loginClass').value;
             var num = document.getElementById('loginNumber').value;
@@ -522,14 +517,12 @@
                         var u = accs[i];
                         if(!u || u.length < 2) continue;
                         
-                        // 구글 시트 데이터 공백 제거 및 절대 정수화
                         var sheetClass = parseInt(u[0]);
                         var sheetNum = parseInt(u[1]);
                         var sheetName = u[2] ? u[2].toString().trim() : "";
                         var sheetPw = u[3] ? u[3].toString().trim() : "";
 
                         if(sheetClass === parseInt(cls) && sheetNum === parseInt(num)) {
-                            // 학번이 일치할 때, 이름과 비번이 완벽하게 일치하는지 확인
                             if(sheetName === name && sheetPw === pw) {
                                 isMatchedExistUser = true;
                             } else {
@@ -559,6 +552,7 @@
                             currentSessionUser.finalScore = res.finalScore;
                             currentSessionUser.feedback = res.feedback;
                             
+                            // 🚀 [핵심 교정] 백엔드에서 받아온 잠금 권한 배열 객체를 프론트 뷰에 실시간 강제 고정
                             menuPermissions.seller = (res.perms[0] === true || res.perms[0] === 'true');
                             menuPermissions.buyer = (res.perms[1] === true || res.perms[1] === 'true');
                             menuPermissions.team = (res.perms[2] === true || res.perms[2] === 'true');
@@ -568,7 +562,10 @@
                             var menus = ['seller', 'buyer', 'team', 'self', 'score'];
                             menus.forEach(function(m){
                                 var el = document.getElementById("menu_" + m);
-                                if(el) el.className = menuPermissions[m] ? 'btn-menu' : 'btn-menu disabled';
+                                if(el) {
+                                    // 권한이 false 이면 무조건 비활성화 클래스로 고정 차단
+                                    el.className = menuPermissions[m] ? 'btn-menu' : 'btn-menu disabled';
+                                }
                             });
                             
                             loginBtn.innerText = "로그인 / 학생 등록하고 입장";
@@ -583,7 +580,11 @@
         }
 
         function enterMenu(menuType) {
-            if(!menuPermissions[menuType]) { alert('선생님이 아직 비활성화해 두신 메뉴입니다.'); return; }
+            // 🚀 [안전장치 레이어] 버튼 클릭 시 한 번 더 실시간 차단 검증
+            if(!menuPermissions[menuType]) { 
+                alert('🔒 선생님이 아직 비활성화해 두신 메뉴이거나 마감된 평가 영역입니다.'); 
+                return; 
+            }
             if(menuType === 'seller') document.getElementById('sellerForm').reset();
             if(menuType === 'buyer') document.getElementById('buyerForm').reset();
             if(menuType === 'team') document.getElementById('teamForm').reset();
