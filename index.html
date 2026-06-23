@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v30</title>
+    <title>지식시장 수행평가 종합 시스템 v31</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -394,7 +394,7 @@
     </div>
 
     <script>
-        var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx_IGYIJxjK5aWCoJIsRRj8K1VI7piAxGjBnQsHjp-XDskgSDdzTyEHmlAyjGjufuiM9A/exec";
+        var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyaFokRizcvpahWVztKJkxuxyObEYXtMTatgnNbEu2OnbFp3-D5Zbvf8a6OB-BtNgi5bA/exec";
 
         var currentSessionUser = null;
         var menuPermissions = { seller: true, buyer: true, team: true, self: true, score: true };
@@ -515,7 +515,8 @@
                         var sheetClass = parseInt(u[0]);
                         var sheetNum = parseInt(u[1]);
                         var sheetName = u[2] ? u[2].toString().trim() : "";
-                        var sheetPw = u[3] ? u[3].toString().trim() : "";
+                        // 🚀 [비번 0 보호용 대조 필터] 시트에 숨겨진 작은따옴표(') 제거 후 입력한 비번과 대조
+                        var sheetPw = u[3] ? u[3].toString().replace(/'/g, "").trim() : "";
 
                         if(sheetClass === parseInt(cls) && sheetNum === parseInt(num)) {
                             if(sheetName === name && sheetPw === pw) {
@@ -789,7 +790,7 @@
             return groups;
         }
 
-        // 🔥 [v30 핵심 업그레이드] 관리자 화면 렌더링 시 가입 명부 데이터를 번호 오름차순으로 즉석 정렬
+        // 🚀 [명부 오름차순 솔팅 엔진 도입] 가입 명부 데이터를 화면에 그릴 때 번호 순서로 즉석 정렬
         function renderAdminDashboard() {
             var accountTbody = document.getElementById('adminUserAccountTable');
             accountTbody.innerHTML = '';
@@ -813,7 +814,7 @@
                 if(scoreMap[r[3]]) stats.team[name].push(scoreMap[r[3]]);
             });
 
-            // 🚀 가입 명부 배열을 복사하여 번호(index 1) 기준 정렬 필터 적용
+            // 🚀 가입 명부 원본 배열을 복사하여 번호(index 1) 기준 정렬 적용
             var accs = globalCloudDatabase.accounts.slice();
             accs.sort(function(a, b) {
                 return parseInt(a[1]) - parseInt(b[1]);
@@ -836,7 +837,7 @@
 
                 accountTbody.innerHTML += '<tr>' +
                     '<td><strong>' + u[1] + '번 ' + u[2] + '</strong></td>' +
-                    '<td style="color:#94a3b8;">' + u[3] + '</td>' +
+                    '<td style="color:#94a3b8;">' + (u[3] ? u[3].toString().replace(/'/g, "") : "") + '</td>' +
                     '<td><input type="number" class="score-input-box" id="sc_mat_' + uniqueKey + '" value="' + m1 + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
                     '<td><input type="number" class="score-input-box" id="sc_que_' + uniqueKey + '" value="' + m2 + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
                     '<td><input type="number" class="score-input-box" id="sc_sel_' + uniqueKey + '" value="' + m3 + '" oninput="calculateLiveTotal(\'' + uniqueKey + '\')"></td>' +
