@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v29</title>
+    <title>지식시장 수행평가 종합 시스템 v30</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -309,7 +309,6 @@
         </div>
     </div>
 
-    <!-- ================= [교사 전용 관제 대시보드] ================= -->
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
         <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료</p>
@@ -394,9 +393,6 @@
         <button class="btn-block btn-back" style="background:#4a5568; color:#fff;" onclick="goMainFromAdmin()">교사 관리 종료 (대문으로)</button>
     </div>
 
-    <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v29
-         ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx_IGYIJxjK5aWCoJIsRRj8K1VI7piAxGjBnQsHjp-XDskgSDdzTyEHmlAyjGjufuiM9A/exec";
 
@@ -423,7 +419,6 @@
             });
         }
 
-        // 💡 [핵심 교정] 교사 대시보드 불러올 때도 문자열 변환 예외를 완전히 처리
         function fetchAllDataFromGoogle() {
             if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
             fetch(WEB_APP_URL + "?action=fetchAllData")
@@ -552,7 +547,6 @@
                             currentSessionUser.finalScore = res.finalScore;
                             currentSessionUser.feedback = res.feedback;
                             
-                            // 💡 [핵심 교정] 대소문자 관계없이 문자열 판정으로 엄격한 통제 필터 작동
                             menuPermissions.seller = (res.perms[0] === true || res.perms[0] === 'true' || res.perms[0] === 'TRUE');
                             menuPermissions.buyer = (res.perms[1] === true || res.perms[1] === 'true' || res.perms[1] === 'TRUE');
                             menuPermissions.team = (res.perms[2] === true || res.perms[2] === 'true' || res.perms[2] === 'TRUE');
@@ -774,7 +768,7 @@
             document.body.removeChild(link);
         }
 
-        function processGroupingForClass(records, targetClass, mode) {
+        function processGroupingForClass(records, classNum, mode) {
             var groups = {};
             for(var i=0; i<records.length; i++) {
                 var r = records[i];
@@ -784,7 +778,7 @@
                 var matchResult = contextText.match(/(\d+)반/);
                 var itemClass = matchResult ? parseInt(matchResult[1]) : parseInt(r[1]);
                 
-                if (isNaN(itemClass) || itemClass !== parseInt(targetClass)) continue;
+                if (isNaN(itemClass) || itemClass !== parseInt(classNum)) continue;
                 
                 var targetName = (mode === 1) ? (r[3] || "미정") : (r[2] || "미정");
                 targetName = targetName.toString().trim();
@@ -795,6 +789,7 @@
             return groups;
         }
 
+        // 🔥 [v30 핵심 업그레이드] 관리자 화면 렌더링 시 가입 명부 데이터를 번호 오름차순으로 즉석 정렬
         function renderAdminDashboard() {
             var accountTbody = document.getElementById('adminUserAccountTable');
             accountTbody.innerHTML = '';
@@ -818,7 +813,12 @@
                 if(scoreMap[r[3]]) stats.team[name].push(scoreMap[r[3]]);
             });
 
-            var accs = globalCloudDatabase.accounts;
+            // 🚀 가입 명부 배열을 복사하여 번호(index 1) 기준 정렬 필터 적용
+            var accs = globalCloudDatabase.accounts.slice();
+            accs.sort(function(a, b) {
+                return parseInt(a[1]) - parseInt(b[1]);
+            });
+
             for(var i=0; i<accs.length; i++) {
                 var u = accs[i]; 
                 if(parseInt(u[0]) !== activeAccountClass) continue;
