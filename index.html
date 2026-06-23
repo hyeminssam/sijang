@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v31</title>
+    <title>지식시장 수행평가 종합 시스템 v32</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -309,6 +309,7 @@
         </div>
     </div>
 
+    <!-- ================= [교사 전용 관제 대시보드] ================= -->
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
         <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료</p>
@@ -393,6 +394,9 @@
         <button class="btn-block btn-back" style="background:#4a5568; color:#fff;" onclick="goMainFromAdmin()">교사 관리 종료 (대문으로)</button>
     </div>
 
+    <!-- =============================================================
+                        JAVASCRIPT CORE ENGINE v32
+         ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyaFokRizcvpahWVztKJkxuxyObEYXtMTatgnNbEu2OnbFp3-D5Zbvf8a6OB-BtNgi5bA/exec";
 
@@ -515,7 +519,6 @@
                         var sheetClass = parseInt(u[0]);
                         var sheetNum = parseInt(u[1]);
                         var sheetName = u[2] ? u[2].toString().trim() : "";
-                        // 🚀 [비번 0 보호용 대조 필터] 시트에 숨겨진 작은따옴표(') 제거 후 입력한 비번과 대조
                         var sheetPw = u[3] ? u[3].toString().replace(/'/g, "").trim() : "";
 
                         if(sheetClass === parseInt(cls) && sheetNum === parseInt(num)) {
@@ -691,23 +694,59 @@
             });
         }
 
+        // 🚀 [v32 엔진 핵심 개조 단락 1/3] 다운로드 통계 연산 시 중복 기록을 '마지막 제출본'으로 덮어씌우는 최신화 필터링 적용
         function downloadAllClassAveragesCSV() {
             var stats = { seller: {}, buyer: {}, team: {} };
             
             globalCloudDatabase.seller.forEach(function(r){
-                var name = r[3]; if(!name) return; name = name.toString().trim();
-                if(!stats.seller[name]) stats.seller[name] = [];
-                if(scoreMap[r[4]]) stats.seller[name].push(scoreMap[r[4]]);
+                var round = r[0];
+                var evaluator = r[2] ? r[2].toString().trim() : ""; 
+                var targetName = r[3] ? r[3].toString().trim() : ""; 
+                if(!targetName || !evaluator) return;
+                
+                var uniqueKey = evaluator + "_" + targetName + "_" + round;
+                if(scoreMap[r[4]]) {
+                    stats.seller[uniqueKey] = { name: targetName, score: scoreMap[r[4]] };
+                }
             });
+            
             globalCloudDatabase.buyer.forEach(function(r){
-                var name = r[2]; if(!name) return; name = name.toString().trim();
-                if(!stats.buyer[name]) stats.buyer[name] = [];
-                if(scoreMap[r[3]]) stats.buyer[name].push(scoreMap[r[3]]);
+                var booth = r[0];
+                var evaluator = r[1] ? r[1].toString().trim() : "";
+                var targetName = r[2] ? r[2].toString().trim() : "";
+                if(!targetName || !evaluator) return;
+                
+                var uniqueKey = evaluator + "_" + targetName + "_" + booth;
+                if(scoreMap[r[3]]) {
+                    stats.buyer[uniqueKey] = { name: targetName, score: scoreMap[r[3]] };
+                }
             });
+            
             globalCloudDatabase.team.forEach(function(r){
-                var name = r[2]; if(!name) return; name = name.toString().trim();
-                if(!stats.team[name]) stats.team[name] = [];
-                if(scoreMap[r[3]]) stats.team[name].push(scoreMap[r[3]]);
+                var evaluator = r[1] ? r[1].toString().trim() : "";
+                var targetName = r[2] ? r[2].toString().trim() : "";
+                if(!targetName || !evaluator) return;
+                
+                var uniqueKey = evaluator + "_" + targetName;
+                if(scoreMap[r[3]]) {
+                    stats.team[uniqueKey] = { name: targetName, score: scoreMap[r[3]] };
+                }
+            });
+
+            // 환산 버킷 누적 단계
+            var finalSellerArr = {}; var finalBuyerArr = {}; var finalTeamArr = {};
+
+            Object.keys(stats.seller).forEach(function(k){
+                var obj = stats.seller[k]; if(!finalSellerArr[obj.name]) finalSellerArr[obj.name] = [];
+                finalSellerArr[obj.name].push(obj.score);
+            });
+            Object.keys(stats.buyer).forEach(function(k){
+                var obj = stats.buyer[k]; if(!finalBuyerArr[obj.name]) finalBuyerArr[obj.name] = [];
+                finalBuyerArr[obj.name].push(obj.score);
+            });
+            Object.keys(stats.team).forEach(function(k){
+                var obj = stats.team[k]; if(!finalTeamArr[obj.name]) finalTeamArr[obj.name] = [];
+                finalTeamArr[obj.name].push(obj.score);
             });
 
             var accs = globalCloudDatabase.accounts;
@@ -722,20 +761,16 @@
                 var name = u[2] ? u[2].toString().trim() : "";
                 
                 if(classBuckets[cNum]) {
-                    var sArr = stats.seller[name] || [];
-                    var bArr = stats.buyer[name] || [];
-                    var tArr = stats.team[name] || [];
+                    var sArr = finalSellerArr[name] || [];
+                    var bArr = finalBuyerArr[name] || [];
+                    var tArr = finalTeamArr[name] || [];
 
                     var sAvg = sArr.length > 0 ? (sArr.reduce((a,b)=>a+b,0)/sArr.length).toFixed(2) : "0.00";
                     var bAvg = bArr.length > 0 ? (bArr.reduce((a,b)=>a+b,0)/bArr.length).toFixed(2) : "0.00";
                     var tAvg = tArr.length > 0 ? (tArr.reduce((a,b)=>a+b,0)/tArr.length).toFixed(2) : "0.00";
 
                     classBuckets[cNum].push({
-                        number: sNum,
-                        name: name,
-                        sellerAvg: sAvg,
-                        buyerAvg: bAvg,
-                        teamAvg: tAvg
+                        number: sNum, name: name, sellerAvg: sAvg, buyerAvg: bAvg, teamAvg: tAvg
                     });
                 }
             });
@@ -745,7 +780,7 @@
                 var currentList = classBuckets[c];
                 currentList.sort(function(a, b){ return a.number - b.number; });
 
-                csvContent += "=== 1학년 " + c + "반 상호평가 환산 정량 통계 리포트 ===\n";
+                csvContent += "=== 1학년 " + c + "반 최신 반영본 환산 통계 리포트 ===\n";
                 csvContent += "번호,성명,판매자 점수 평균(5점만점),구매자 점수 평균(5점만점),동료 조원평가 평균(5점만점)\n";
 
                 if(currentList.length === 0) {
@@ -762,7 +797,7 @@
             var link = document.createElement("a");
             var url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", "지식시장_반별_상호평가_평균점수_명부_정렬판.csv");
+            link.setAttribute("download", "지식시장_최종제출제한_상호평가_평균점수.csv");
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -790,35 +825,46 @@
             return groups;
         }
 
-        // 🚀 [명부 오름차순 솔팅 엔진 도입] 가입 명부 데이터를 화면에 그릴 때 번호 순서로 즉석 정렬
+        // 🚀 [v32 엔진 핵심 개조 단락 2/3] 교사 대시보드 화면 채점단에도 최신 단일 평가만 인정하도록 마크 다운
         function renderAdminDashboard() {
             var accountTbody = document.getElementById('adminUserAccountTable');
             accountTbody.innerHTML = '';
             var hasAccount = false;
             
-            var stats = { seller: {}, buyer: {}, team: {} };
+            var liveStatsUnique = { seller: {}, buyer: {}, team: {} };
             
             globalCloudDatabase.seller.forEach(function(r){
-                var name = r[3]; if(!name) return; name = name.toString().trim();
-                if(!stats.seller[name]) stats.seller[name] = [];
-                if(scoreMap[r[4]]) stats.seller[name].push(scoreMap[r[4]]);
+                var round = r[0]; var evaluator = r[2] ? r[2].toString().trim() : ""; var targetName = r[3] ? r[3].toString().trim() : ""; 
+                if(targetName && evaluator && scoreMap[r[4]]) {
+                    liveStatsUnique.seller[evaluator + "_" + targetName + "_" + round] = { name: targetName, score: scoreMap[r[4]] };
+                }
             });
             globalCloudDatabase.buyer.forEach(function(r){
-                var name = r[2]; if(!name) return; name = name.toString().trim();
-                if(!stats.buyer[name]) stats.buyer[name] = [];
-                if(scoreMap[r[3]]) stats.buyer[name].push(scoreMap[r[3]]);
+                var booth = r[0]; var evaluator = r[1] ? r[1].toString().trim() : ""; var targetName = r[2] ? r[2].toString().trim() : "";
+                if(targetName && evaluator && scoreMap[r[3]]) {
+                    liveStatsUnique.buyer[evaluator + "_" + targetName + "_" + booth] = { name: targetName, score: scoreMap[r[3]] };
+                }
             });
             globalCloudDatabase.team.forEach(function(r){
-                var name = r[2]; if(!name) return; name = name.toString().trim();
-                if(!stats.team[name]) stats.team[name] = [];
-                if(scoreMap[r[3]]) stats.team[name].push(scoreMap[r[3]]);
+                var evaluator = r[1] ? r[1].toString().trim() : ""; var targetName = r[2] ? r[2].toString().trim() : "";
+                if(targetName && evaluator && scoreMap[r[3]]) {
+                    liveStatsUnique.team[evaluator + "_" + targetName] = { name: targetName, score: scoreMap[r[3]] };
+                }
             });
 
-            // 🚀 가입 명부 원본 배열을 복사하여 번호(index 1) 기준 정렬 적용
-            var accs = globalCloudDatabase.accounts.slice();
-            accs.sort(function(a, b) {
-                return parseInt(a[1]) - parseInt(b[1]);
+            var stats = { seller: {}, buyer: {}, team: {} };
+            Object.keys(liveStatsUnique.seller).forEach(function(k){
+                var obj = liveStatsUnique.seller[k]; if(!stats.seller[obj.name]) stats.seller[obj.name] = []; stats.seller[obj.name].push(obj.score);
             });
+            Object.keys(liveStatsUnique.buyer).forEach(function(k){
+                var obj = liveStatsUnique.buyer[k]; if(!stats.buyer[obj.name]) stats.buyer[obj.name] = []; stats.buyer[obj.name].push(obj.score);
+            });
+            Object.keys(liveStatsUnique.team).forEach(function(k){
+                var obj = liveStatsUnique.team[k]; if(!stats.team[obj.name]) stats.team[obj.name] = []; stats.team[obj.name].push(obj.score);
+            });
+
+            var accs = globalCloudDatabase.accounts.slice();
+            accs.sort(function(a, b) { return parseInt(a[1]) - parseInt(b[1]); });
 
             for(var i=0; i<accs.length; i++) {
                 var u = accs[i]; 
@@ -826,14 +872,8 @@
                 hasAccount = true;
                 var uniqueKey = u[0] + "_" + u[1];
                 
-                var m1 = u[4] || "0";
-                var m2 = u[5] || "0";
-                var m3 = u[6] || "0";
-                var m4 = u[7] || "0";
-                var m5 = u[8] || "0";
-                var m6 = u[9] || "0";
-                var loadedTotal = u[10] || "14";
-                var cleanFeedback = u[11] || "";
+                var m1 = u[4] || "0"; var m2 = u[5] || "0"; var m3 = u[6] || "0"; var m4 = u[7] || "0"; var m5 = u[8] || "0"; var m6 = u[9] || "0";
+                var loadedTotal = u[10] || "14"; var cleanFeedback = u[11] || "";
 
                 accountTbody.innerHTML += '<tr>' +
                     '<td><strong>' + u[1] + '번 ' + u[2] + '</strong></td>' +
@@ -856,41 +896,50 @@
             renderCloudGroupedView('groupedTeamView', globalCloudDatabase.team, activeAccountClass, 3, stats.team);
 
             var selfTbody = document.getElementById('flatSelfTableBody');
-            selfTbody.innerHTML = '';
-            var selves = globalCloudDatabase.self;
+            selfTbody.innerHTML = ''; var selves = globalCloudDatabase.self;
             for(var j=0; j<selves.length; j++) {
-                var s = selves[j];
-                if(parseInt(s[0]) !== activeAccountClass) continue;
+                var s = selves[j]; if(parseInt(s[0]) !== activeAccountClass) continue;
                 selfTbody.innerHTML += '<tr><td>' + s[0] + '반</td><td><strong>' + s[2] + '</strong></td><td>' + s[3] + '</td><td style="text-align:left;">' + s[4] + '</td><td style="color:#aaa;">' + s[5] + '</td></tr>';
             }
         }
 
+        // 🚀 [v32 엔진 핵심 개조 단락 3/3] 하단 시각 서술형 대시보드 리포트 창에서도 중복 평가는 숨기고 최종 제출 라인만 마스킹 노출
         function renderCloudGroupedView(viewId, records, classNum, mode, statObj) {
-            var container = document.getElementById(viewId);
-            container.innerHTML = '';
+            var container = document.getElementById(viewId); container.innerHTML = '';
             var grouped = processGroupingForClass(records, classNum, mode);
             var hasData = false;
 
             for(var targetName in grouped) {
                 hasData = true;
-                var list = grouped[targetName];
+                var rawList = grouped[targetName];
+                
+                // 역순으로 훑어 동일 평가자가 보낸 중복은 제일 최신(마지막) 것만 살려내기
+                var uniqueUserCheck = {}; var filteredList = [];
+                for(var m = rawList.length - 1; m >= 0; m--) {
+                    var item = rawList[m];
+                    var evalKey = (mode === 1) ? item[2] + "_" + item[0] : (mode === 2) ? item[1] + "_" + item[0] : item[1];
+                    if(!uniqueUserCheck[evalKey]) {
+                        uniqueUserCheck[evalKey] = true;
+                        filteredList.unshift(item); // 본래 순서 방향으로 유지
+                    }
+                }
+
                 var rawArr = statObj[targetName] || [];
                 var avgText = "평가 기록 없음";
                 if(rawArr.length > 0) {
                     var sum = rawArr.reduce(function(a, b){ return a + b; }, 0);
-                    avgText = "⭐ 상호 평정 5점 만점 환산 평균: [ " + (sum / rawArr.length).toFixed(2) + " 점 ] / 참여횟수: " + rawArr.length + "회";
+                    avgText = "⭐ 상호 평정 최신본 5점 만점 환산 평균: [ " + (sum / rawArr.length).toFixed(2) + " 점 ] / 유효 피평가 횟수: " + rawArr.length + "회";
                 }
 
                 var html = '<div class="class-section" style="border-left: 5px solid var(--secondary-color);">' +
                            '<p style="font-weight:bold; margin-bottom:4px; color:#2c5282;">🎯 피평가 대상자 학생: [ ' + targetName + ' ]</p>' +
                            '<p style="font-size:0.85rem; color:#4a5568; font-weight:bold; margin-bottom:8px; background:#edf2f7; padding:6px; border-radius:4px;">' + avgText + '</p>' +
                            '<div class="table-wrapper"><table><tbody>';
-                for(var k=0; k<list.length; k++) {
-                    var item = list[k];
-                    html += '<tr>';
-                    if(mode === 1) html += '<td style="width:10%;">포지션: 판매자</td><td style="width:15%;">' + item[0] + '</td><td>평가한 구매자: ' + item[2] + '</td><td style="font-weight:bold; color:magenta;">태도평정: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
-                    else if(mode === 2) html += '<td style="width:10%;">포지션: 구매자</td><td style="width:15%;">' + item[0] + '</td><td>평가한 판매자: ' + item[1] + '</td><td style="font-weight:bold; color:purple;">발표평정: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
-                    else if(mode === 3) html += '<td style="width:15%;">동료 상호평가</td><td>평가한 조원: ' + item[1] + '</td><td style="font-weight:bold; color:blue;">기여도평정: ' + item[3] + '</td><td style="text-align:left; background:#fffaf0;">✍️ 서술사유: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
+                for(var k=0; k<filteredList.length; k++) {
+                    var item = filteredList[k]; html += '<tr>';
+                    if(mode === 1) html += '<td style="width:10%;">포지션: 판매자</td><td style="width:15%;">' + item[0] + '</td><td>평가한 구매자: ' + item[2] + '</td><td style="font-weight:bold; color:magenta;">태도평정: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + ' (최신반영)</td>';
+                    else if(mode === 2) html += '<td style="width:10%;">포지션: 구매자</td><td style="width:15%;">' + item[0] + '</td><td>평가한 판매자: ' + item[1] + '</td><td style="font-weight:bold; color:purple;">발표평정: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + ' (최신반영)</td>';
+                    else if(mode === 3) html += '<td style="width:15%;">동료 상호평가</td><td>평가한 조원: ' + item[1] + '</td><td style="font-weight:bold; color:blue;">기여도평정: ' + item[3] + '</td><td style="text-align:left; background:#fffaf0;">✍️ 서술사유: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + ' (최신반영)</td>';
                     html += '</tr>';
                 }
                 html += '</tbody></table></div></div>';
@@ -910,8 +959,7 @@
         function switchPage(pageId) {
             var pages = ['pageLogin', 'pageMenu', 'pageSeller', 'pageBuyer', 'pageTeam', 'pageSelf', 'pageScore'];
             for(var i=0; i<pages.length; i++) {
-                var el = document.getElementById(pages[i]);
-                if(el) el.style.display = (pages[i] === pageId) ? 'block' : 'none';
+                var el = document.getElementById(pages[i]); if(el) el.style.display = (pages[i] === pageId) ? 'block' : 'none';
             }
         }
     </script>
