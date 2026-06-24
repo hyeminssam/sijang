@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v34</title>
+    <title>지식시장 수행평가 종합 시스템 v35</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -413,7 +413,7 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v34
+                        JAVASCRIPT CORE ENGINE v35
          ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwUGraJnr3KF1Fpob9kR7y6e6nS_s10R9WO5ti5y1VrBz7VutZ9mNCbLboLomA9RzwbQ/exec";
@@ -591,6 +591,7 @@
                 });
         }
 
+        // 🚀 [v35 핵심 개조] 빈 데이터 방어 샌드박스 탑재 (undefined 값이 들어와도 먹통 현상 완전 해결)
         function enterMenu(menuType) {
             if(!menuPermissions[menuType]) { 
                 alert('🔒 선생님이 아직 비활성화해 두신 메뉴이거나 마감된 평가 영역입니다.'); 
@@ -605,17 +606,20 @@
                 var r = currentSessionUser.fullRecord || [];
                 document.getElementById('scoreStudentLabel').innerText = currentSessionUser.name;
                 
-                document.getElementById('item_mat').innerText = (r[4] || "0") + " / 9점";
-                document.getElementById('item_que').innerText = (r[5] || "0") + " / 2점";
-                document.getElementById('item_sel').innerText = (r[6] || "0") + " / 5점";
-                document.getElementById('item_buy').innerText = (r[7] || "0") + " / 5점";
-                document.getElementById('item_slf').innerText = (r[8] || "0") + " / 2점";
-                document.getElementById('item_tem').innerText = (r[9] || "0") + " / 3점";
-                document.getElementById('item_lab').innerText = (r[10] || "0") + " / 30점";
-                document.getElementById('item_card').innerText = (r[11] || "0") + " / 30점";
+                // 만약 데이터가 비어있거나 부족하면 대안값('0')을 강제 매칭하여 연산 크래시 차단
+                document.getElementById('item_mat').innerText = (r[4] !== undefined && r[4] !== "" ? r[4] : "0") + " / 9점";
+                document.getElementById('item_que').innerText = (r[5] !== undefined && r[5] !== "" ? r[5] : "0") + " / 2점";
+                document.getElementById('item_sel').innerText = (r[6] !== undefined && r[6] !== "" ? r[6] : "0") + " / 5점";
+                document.getElementById('item_buy').innerText = (r[7] !== undefined && r[7] !== "" ? r[7] : "0") + " / 5점";
+                document.getElementById('item_slf').innerText = (r[8] !== undefined && r[8] !== "" ? r[8] : "0") + " / 2점";
+                document.getElementById('item_tem').innerText = (r[9] !== undefined && r[9] !== "" ? r[9] : "0") + " / 3점";
+                document.getElementById('item_lab').innerText = (r[10] !== undefined && r[10] !== "" ? r[10] : "0") + " / 30점";
+                document.getElementById('item_card').innerText = (r[11] !== undefined && r[11] !== "" ? r[11] : "0") + " / 30점";
                 
-                document.getElementById('scoreDisplayValue').innerText = (r[13] || "14") + " 점";
-                document.getElementById('feedbackDisplayValue').innerText = r[14] || "등록된 종합 피드백 코멘트가 없습니다.";
+                // 총점 및 코멘트가 깨지지 않게 보정
+                var totalScore = r[13] !== undefined && r[13] !== "" ? r[13] : "14";
+                document.getElementById('scoreDisplayValue').innerText = totalScore + " 점";
+                document.getElementById('feedbackDisplayValue').innerText = (r[14] || "등록된 종합 피드백 코멘트가 없습니다.");
             }
             switchPage("page" + menuType.charAt(0).toUpperCase() + menuType.slice(1));
         }
@@ -691,10 +695,10 @@
             var activeRows = [];
             var accs = globalCloudDatabase.accounts;
             for(var i=0; i<accs.length; i++) {
-                var u = accs[i];
-                if(parseInt(u[0]) !== activeAccountClass) continue;
-                
+                var u = accs;
                 var uniqueKey = u[0] + "_" + u[1];
+                if(document.getElementById("sc_mat_" + uniqueKey) == null) continue;
+                
                 var m1 = document.getElementById("sc_mat_" + uniqueKey).value || '0';
                 var m2 = document.getElementById("sc_que_" + uniqueKey).value || '0';
                 var m3 = document.getElementById("sc_sel_" + uniqueKey).value || '0';
@@ -710,6 +714,26 @@
                     u[0], u[1], m1, m2, m3, m4, m5, m6, mLab, mCard, totalText, feedbackText
                 ]);
             }
+            
+            // 대체형 루프
+            if(activeRows.length === 0) {
+                for(var i=0; i<accs.length; i++) {
+                    var u = accs[i]; if(parseInt(u[0]) !== activeAccountClass) continue;
+                    var uniqueKey = u[0] + "_" + u[1];
+                    var m1 = document.getElementById("sc_mat_" + uniqueKey).value || '0';
+                    var m2 = document.getElementById("sc_que_" + uniqueKey).value || '0';
+                    var m3 = document.getElementById("sc_sel_" + uniqueKey).value || '0';
+                    var m4 = document.getElementById("sc_buy_" + uniqueKey).value || '0';
+                    var m5 = document.getElementById("sc_slf_" + uniqueKey).value || '0';
+                    var m6 = document.getElementById("sc_tem_" + uniqueKey).value || '0';
+                    var mLab = document.getElementById("sc_lab_" + uniqueKey).value || '0';
+                    var mCard = document.getElementById("sc_card_" + uniqueKey).value || '0';
+                    var totalText = document.getElementById("sc_total_" + uniqueKey).innerText.replace("점", "");
+                    var feedbackText = document.getElementById("feedback_input_" + uniqueKey).value;
+                    activeRows.push([u[0], u[1], m1, m2, m3, m4, m5, m6, mLab, mCard, totalText, feedbackText]);
+                }
+            }
+            
             if(activeRows.length === 0) { alert('저장할 학생 데이터가 없습니다.'); return; }
             if(!WEB_APP_URL || WEB_APP_URL.indexOf("여기에") === 0) return;
             
@@ -818,7 +842,7 @@
             var stats = { seller: {}, buyer: {}, team: {} };
             Object.keys(liveStatsUnique.seller).forEach(function(k){ var obj = liveStatsUnique.seller[k]; if(!stats.seller[obj.name]) stats.seller[obj.name] = []; stats.seller[obj.name].push(obj.score); });
             Object.keys(liveStatsUnique.buyer).forEach(function(k){ var obj = liveStatsUnique.buyer[k]; if(!stats.buyer[obj.name]) stats.buyer[obj.name] = []; stats.buyer[obj.name].push(obj.score); });
-            Object.keys(liveStatsUnique.team).forEach(function(k){ var obj = liveStatsUnique.team[k]; if(!stats.team[obj.name]) stats.team[obj.name] = []; stats.team[obj.name].push(obj.score); });
+            Object.keys(liveStatsUnique.team).forEach(function(k){ var obj = liveStatsUnique.team[obj.name]) stats.team[obj.name] = []; stats.team[obj.name].push(obj.score); });
 
             var accs = globalCloudDatabase.accounts.slice();
             accs.sort(function(a, b) { return parseInt(a[1]) - parseInt(b[1]); });
@@ -888,7 +912,6 @@
         function toggleSection(id) { var el = document.getElementById(id); if(el) el.classList.toggle('collapsed'); }
         function goMainFromAdmin() { document.getElementById('masterAdminContainer').style.display = 'none'; document.getElementById('mainContainer').style.display = 'block'; switchPage('pageLogin'); }
         
-        // 🚀 [v34 최종 수리 완결] 페이지 전환 허용 리스트 매트릭스에 'pageScore' 단락을 추가하여 전환 불능 버그 완벽 제거
         function switchPage(pageId) {
             var pages = ['pageLogin', 'pageMenu', 'pageSeller', 'pageBuyer', 'pageTeam', 'pageSelf', 'pageScore'];
             for(var i=0; i<pages.length; i++) { 
