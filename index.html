@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v36</title>
+    <title>지식시장 수행평가 종합 시스템 v37</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -95,6 +95,10 @@
 
         .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; text-align: left; }
         .score-row { background: #edf2f7; padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 500; }
+        .macro-box { background: #f8fafc; border: 2px solid #cbd5e1; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center; }
+        .macro-item { text-align: center; }
+        .macro-title { font-size: 0.85rem; color: #64748b; font-weight: bold; }
+        .macro-score { font-size: 1.3rem; font-weight: 800; color: #2d3748; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -302,11 +306,31 @@
 
         <div id="pageScore" class="page">
             <h2>💯 나의 과학 수행평가 성적 리포트</h2>
-            <div class="eval-student-card" style="text-align: center;">
-                <p style="font-weight: bold; font-size: 1.1rem; color:#4a5568;">🏆 <span id="scoreStudentLabel">-</span> 학생 100점 만점 최종 종합 총점</p>
-                <div style="font-size: 2.5rem; font-weight: 900; color: #c53030; margin: 10px 0;" id="scoreDisplayValue">0 점</div>
+            <div class="eval-student-card">
+                <p style="font-weight: bold; font-size: 1.05rem; color:#4a5568; text-align:center; margin-bottom: 12px;">🏆 <span id="scoreStudentLabel">-</span> 학생 수행평가 최종 결과</p>
                 
-                <h4 style="margin-top: 20px; border-bottom: 2px solid #cbd5e1; padding-bottom: 5px; text-align: left;">📋 평가 세부 항목별 획득 점수</h4>
+                <!-- 🚀 영역별 대분류 스코어 보드 배치 -->
+                <div class="macro-box">
+                    <div class="macro-item">
+                        <div class="macro-title">🎪 지식시장 수행</div>
+                        <div class="macro-score" id="macro_market_total" style="color: #b39eb5;">0 / 40점</div>
+                    </div>
+                    <div class="macro-item" style="border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; padding: 0 20px;">
+                        <div class="macro-title">🧪 실험 실기평가</div>
+                        <div class="macro-score" id="macro_lab_score" style="color: #2b6cb0;">0 / 30점</div>
+                    </div>
+                    <div class="macro-item">
+                        <div class="macro-title">🃏 생물 카드평가</div>
+                        <div class="macro-score" id="macro_card_score" style="color: #4c51bf;">0 / 30점</div>
+                    </div>
+                </div>
+
+                <div style="background: var(--warning-color); padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 20px;">
+                    <span style="font-size: 0.9rem; font-weight: bold; color: #c53030;">합산 최종 종합 총점 : </span>
+                    <strong style="font-size: 1.8rem; font-weight: 900; color: #c53030; margin-left: 5px;" id="scoreDisplayValue">0 점</strong>
+                </div>
+                
+                <h4 style="margin-top: 15px; border-bottom: 2px solid #cbd5e1; padding-bottom: 5px; text-align: left; font-size:0.95rem; color:#4a5568;">🔍 지식시장(40점 만점) 세부 감정 스펙트럼</h4>
                 <div class="score-grid">
                     <div class="score-row"><span>① 지식시장 보고서 점수</span><strong id="item_mat">0 / 9점</strong></div>
                     <div class="score-row"><span>② 지식시장 질문 점수</span><strong id="item_que">0 / 2점</strong></div>
@@ -314,13 +338,11 @@
                     <div class="score-row"><span>④ 구매자 발표 상호평가</span><strong id="item_buy">0 / 5점</strong></div>
                     <div class="score-row"><span>⑤ 자기 탐구 성찰 점수</span><strong id="item_slf">0 / 2점</strong></div>
                     <div class="score-row"><span>⑥ 조원 기여 상호평가</span><strong id="item_tem">0 / 3점</strong></div>
-                    <div class="score-row"><span>⑦ 과학 실험 실기평가</span><strong id="item_lab" style="color: #2b6cb0;">0 / 30점</strong></div>
-                    <div class="score-row"><span>⑧ 멸종위기 생물 카드</span><strong id="item_card" style="color: #2b6cb0;">0 / 30점</strong></div>
-                    <div class="score-row" style="grid-column: span 2; background:#e2e8f0;"><span>⑨ 지식시장 기본 점수</span><strong>14 / 14점</strong></div>
+                    <div class="score-row" style="grid-column: span 2; background:#fff2f2; border: 1px dashed #feb2b2;"><span>⑦ 지식시장 미응시 감점 방지 기본 점수</span><strong>14 / 14점</strong></div>
                 </div>
 
-                <label style="margin-top:20px; display:block; text-align: left; font-weight: bold;">💬 과목 담당 교사 종합 피드백 코멘트:</label>
-                <div id="feedbackDisplayValue" style="background:#f7fafc; padding:12px; border-radius:8px; text-align: left; border-left: 4px solid var(--secondary-color); margin-top: 5px;">-</div>
+                <label style="margin-top:20px; display:block; text-align: left; font-weight: bold; font-size:0.9rem;">💬 과목 담당 교사 종합 피드백 코멘트:</label>
+                <div id="feedbackDisplayValue" style="background:#f7fafc; padding:12px; border-radius:8px; text-align: left; border-left: 4px solid var(--secondary-color); margin-top: 5px; font-size:0.9rem; line-height:1.5;">-</div>
             </div>
             <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
         </div>
@@ -413,7 +435,7 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v36
+                        JAVASCRIPT CORE ENGINE v37
          ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwUGraJnr3KF1Fpob9kR7y6e6nS_s10R9WO5ti5y1VrBz7VutZ9mNCbLboLomA9RzwbQ/exec";
@@ -495,7 +517,7 @@
                 document.getElementById('mainContainer').style.display = 'none';
                 document.getElementById('masterAdminContainer').style.display = 'block';
                 fetchAllDataFromGoogle(); 
-            } else { alert('비밀번호 오류'); }
+            } else { alert('비밀번호 오류'); }verifyAdminPassword
         }
 
         function changeClassFilter(target, classNum) {
@@ -591,6 +613,7 @@
                 });
         }
 
+        // 🎯 [v37 독립 연산 로직 수립] 영역별 만점 기준 독립 점수 추출 및 결합 배정
         function enterMenu(menuType) {
             if(!menuPermissions[menuType]) { 
                 alert('🔒 선생님이 아직 비활성화해 두신 메뉴이거나 마감된 평가 영역입니다.'); 
@@ -610,18 +633,36 @@
                 var labelEl = document.getElementById('scoreStudentLabel');
                 if(labelEl) labelEl.innerText = currentSessionUser.name;
                 
-                if(document.getElementById('item_mat')) document.getElementById('item_mat').innerText = (r[4] !== undefined ? r[4] : "0") + " / 9점";
-                if(document.getElementById('item_que')) document.getElementById('item_que').innerText = (r[5] !== undefined ? r[5] : "0") + " / 2점";
-                if(document.getElementById('item_sel')) document.getElementById('item_sel').innerText = (r[6] !== undefined ? r[6] : "0") + " / 5점";
-                if(document.getElementById('item_buy')) document.getElementById('item_buy').innerText = (r[7] !== undefined ? r[7] : "0") + " / 5점";
-                if(document.getElementById('item_slf')) document.getElementById('item_slf').innerText = (r[8] !== undefined ? r[8] : "0") + " / 2점";
-                if(document.getElementById('item_tem')) document.getElementById('item_tem').innerText = (r[9] !== undefined ? r[9] : "0") + " / 3점";
-                if(document.getElementById('item_lab')) document.getElementById('item_lab').innerText = (r[10] !== undefined ? r[10] : "0") + " / 30점";
-                if(document.getElementById('item_card')) document.getElementById('item_card').innerText = (r[11] !== undefined ? r[11] : "0") + " / 30점";
+                // 1. 개별 단위 텍스트 주입
+                var vMat = parseFloat(r[4]) || 0;
+                var vQue = parseFloat(r[5]) || 0;
+                var vSel = parseFloat(r[6]) || 0;
+                var vBuy = parseFloat(r[7]) || 0;
+                var vSlf = parseFloat(r[8]) || 0;
+                var vTem = parseFloat(r[9]) || 0;
+                var vLab = parseFloat(r[10]) || 0;
+                var vCard = parseFloat(r[11]) || 0;
+                var vBase = 14;
+
+                if(document.getElementById('item_mat')) document.getElementById('item_mat').innerText = vMat + " / 9점";
+                if(document.getElementById('item_que')) document.getElementById('item_que').innerText = vQue + " / 2점";
+                if(document.getElementById('item_sel')) document.getElementById('item_sel').innerText = vSel + " / 5점";
+                if(document.getElementById('item_buy')) document.getElementById('item_buy').innerText = vBuy + " / 5점";
+                if(document.getElementById('item_slf')) document.getElementById('item_slf').innerText = vSlf + " / 2점";
+                if(document.getElementById('item_tem')) document.getElementById('item_tem').innerText = vTem + " / 3점";
+                if(document.getElementById('item_lab')) document.getElementById('item_lab').innerText = vLab + " / 30점";
+                if(document.getElementById('item_card')) document.getElementById('item_card').innerText = vCard + " / 30점";
                 
-                var totalScore = r[13] !== undefined ? r[13] : (r[12] !== undefined ? r[12] : "14");
+                // 2. 대분류 연산 배정 처리
+                var marketTotalSum = vMat + vQue + vSel + vBuy + vSlf + vTem + vBase;
+                var totalScore = marketTotalSum + vLab + vCard;
                 var teacherFeedback = r[14] !== undefined ? r[14] : (r[13] !== undefined ? "" : "아직 입력된 피드백이 없습니다.");
                 
+                // 3. 분리된 상단 상자 노출 반영
+                if(document.getElementById('macro_market_total')) document.getElementById('macro_market_total').innerText = marketTotalSum + " / 40점";
+                if(document.getElementById('macro_lab_score')) document.getElementById('macro_lab_score').innerText = vLab + " / 30점";
+                if(document.getElementById('macro_card_score')) document.getElementById('macro_card_score').innerText = vCard + " / 30점";
+
                 if(document.getElementById('scoreDisplayValue')) document.getElementById('scoreDisplayValue').innerText = totalScore + " 점";
                 if(document.getElementById('feedbackDisplayValue')) document.getElementById('feedbackDisplayValue').innerText = teacherFeedback || "등록된 종합 피드백 코멘트가 없습니다.";
             }
