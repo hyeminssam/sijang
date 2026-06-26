@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v40</title>
+    <title>지식시장 수행평가 종합 시스템 v41</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -117,7 +117,7 @@
 
         <div id="pageLogin" class="page active">
             <h2>지식시장 로그인 및 계정 등록</h2>
-            <div class="alert-text">⚠️ 평가자가 소속된 '반'을 기반으로 동명이인을 원천 분리하는 격리 엔진이 적용되었습니다.<br>안심하고 같은 반/번호/이름으로 로그인 및 평가를 진행해 주세요.</div>
+            <div class="alert-text">⚠️ 5열 원래 시트 포맷 구조를 지키며 동명이인을 격리하는 v41 교정 엔진이 탑재되었습니다.</div>
             
             <div class="form-grid">
                 <div>
@@ -294,7 +294,7 @@
                         <label class="radio-label"><input type="radio" name="selfScore" value="매우 미흡">매우 미흡</label>
                         <label class="radio-label"><input type="radio" name="selfScore" value="미흡">미흡</label>
                         <label class="radio-label"><input type="radio" name="selfScore" value="보통" checked>보통</label>
-                        <label class="radio-label"><input type="radio" name="selfScore" value="우수">우수</label>
+                        <label class="macro-label"><input type="radio" name="selfScore" value="우수">우수</label>
                         <label class="radio-label"><input type="radio" name="selfScore" value="매우 우수">매우 우수</label>
                     </div>
                     <label style="margin-top:12px; color: #c53030;">✍️ 스스로 배우고 성장한 점 및 반성할 점 (필수)</label>
@@ -350,7 +350,7 @@
 
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
-        <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료 (★평가자 소속 반 기준 완전 격리 모드 활성화)</p>
+        <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료 (★원래 5열 구조 복구 & 평가자 반 기준 분리 활성화)</p>
         
         <h3>⚙️ 학생단 접속 메뉴 활성화 스위치 (실시간 제어)
             <button class="btn-toggle-view" onclick="toggleSection('sec_switch')">접기/펼치기</button>
@@ -401,17 +401,17 @@
             </div>
         </div>
 
-        <h3>📊 1. 구매자 태도 분석 리포트 (평가자 반 기준 완전 격리)
+        <h3>📊 1. 구매자 태도 분석 리포트 (원래 5열 저장 및 평가자 반 격리)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report1')">접기/펼치기</button>
         </h3>
         <div id="sec_report1" class="section-content collapsed"><div id="groupedSellerView"></div></div>
 
-        <h3>📊 2. 판매자 발표 분석 리포트 (평가자 반 기준 완전 격리)
+        <h3>📊 2. 판매자 발표 분석 리포트 (원래 5열 저장 및 평가자 반 격리)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report2')">접기/펼치기</button>
         </h3>
         <div id="sec_report2" class="section-content collapsed"><div id="groupedBuyerView"></div></div>
 
-        <h3>📊 3. 조원 동료 상호 평가 사유 리포트 (평가자 반 기준 완전 격리)
+        <h3>📊 3. 조원 동료 상호 평가 사유 리포트 (원래 5열 저장 및 평가자 반 격리)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report3')">접기/펼치기</button>
         </h3>
         <div id="sec_report3" class="section-content collapsed"><div id="groupedTeamView"></div></div>
@@ -660,6 +660,7 @@
         function handleLogout() { switchPage('pageLogin'); }
         function exitSubPage() { switchPage('pageMenu'); }
 
+        // 🚀 [v41 수리] 원래대로 [조이름, 평가자, 평가대상자, 척도, 시간] 딱 5개 항목 순서 유지
         function submitSellerEval(event) {
             event.preventDefault();
             var round = document.getElementById('sellerRound').value;
@@ -668,7 +669,9 @@
                 var name = document.getElementById("buyerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='buyerAttitude" + i + "']:checked").value;
-                    sendToGoogleDatabase('seller', [round, parseInt(currentSessionUser.classNum), currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
+                    // 평가자 이름에 반 정보 강제 주입: 예) "1반 조혜민"
+                    var compositeEvaluator = currentSessionUser.classNum + "반 " + currentSessionUser.name;
+                    sendToGoogleDatabase('seller', [round, compositeEvaluator, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
             }
@@ -676,7 +679,6 @@
             exitSubPage();
         }
 
-        // 🚀 [v40 핵심 정렬 수리] 배열 구조를 구글 시트 저장 엔진 순서와 일대일 정밀 동기화하여 undefined 버그 영구 격리
         function submitBuyerEval(event) {
             event.preventDefault();
             var booth = document.getElementById('buyerBooth').value;
@@ -685,8 +687,9 @@
                 var name = document.getElementById("sellerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='sellerScore" + i + "']:checked").value;
-                    // 인덱스 순서 재정렬: [부스명, 평가자반, 평가자이름, 피평가자(판매자)이름, 평정단계, 작성시간]
-                    sendToGoogleDatabase('buyer', [booth, parseInt(currentSessionUser.classNum), currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
+                    // 평가자 이름에 반 정보 강제 주입하여 5열 구조 사수
+                    var compositeEvaluator = currentSessionUser.classNum + "반 " + currentSessionUser.name;
+                    sendToGoogleDatabase('buyer', [booth, compositeEvaluator, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
             }
@@ -699,7 +702,9 @@
             var target = document.getElementById('teamTargetName').value.trim();
             var score = document.querySelector("input[name='teamScore']:checked").value;
             var reason = document.getElementById('teamReason').value.trim();
-            sendToGoogleDatabase('team', [parseInt(currentSessionUser.classNum), currentSessionUser.name, target, score, reason, new Date().toLocaleTimeString()]);
+            // 평가자 이름 앞에 반을 결합하여 5열 구조 사수
+            var compositeEvaluator = currentSessionUser.classNum + "반 " + currentSessionUser.name;
+            sendToGoogleDatabase('team', [compositeEvaluator, target, score, reason, new Date().toLocaleTimeString()]);
             alert('동료 평가가 정상 제출되었습니다!'); exitSubPage();
         }
 
@@ -707,7 +712,7 @@
             event.preventDefault();
             var score = document.querySelector("input[name='selfScore']:checked").value;
             var reason = document.getElementById('selfReason').value.trim();
-            sendToGoogleDatabase('self', [parseInt(currentSessionUser.classNum), currentSessionUser.name, currentSessionUser.name, score, reason, new Date().toLocaleTimeString()]);
+            sendToGoogleDatabase('self', [currentSessionUser.classNum, currentSessionUser.name, currentSessionUser.name, score, reason, new Date().toLocaleTimeString()]);
             alert('자기 성찰 평가가 정상 제출되었습니다!'); exitSubPage();
         }
 
@@ -768,7 +773,7 @@
 
             var csvContent = "\ufeff"; 
             for(var c=1; c<=7; c++) {
-                csvContent += "=== 1학년 " + c + "반 상호평가 정밀 격리 리포트 (평가자 반 기준) ===\n";
+                csvContent += "=== 1학년 " + c + "반 상호평가 정밀 격리 리포트 (텍스트 분석 기반) ===\n";
                 csvContent += "번호,성명,판매자태도평균(5점),구매자발표평균(5점),동료기여도평균(5점)\n";
                 
                 var currentClassStudents = globalCloudDatabase.accounts.filter(function(u){ return parseInt(u[0]) === c; });
@@ -793,17 +798,22 @@
 
             var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             var link = document.createElement("a"); var url = URL.createObjectURL(blob);
-            link.setAttribute("href", url); link.setAttribute("download", "지식시장_평가자반기준_상호평가통계.csv");
+            link.setAttribute("href", url); link.setAttribute("download", "지식시장_정밀보정_상호평가통계.csv");
             link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
+        // 🚀 [v41 수리] 원래 저장된 텍스트 형식 속에서 "평가자의 반"을 유추하여 격리 정밀 연산
         function compileAveragesByEvaluatorClass() {
             var rawScores = { seller: {}, buyer: {}, team: {} };
 
+            // 1. 판매자 평가 파싱 (인덱스 1번에 "X반 성명" 형태 파싱)
             globalCloudDatabase.seller.forEach(function(r){
-                var evalClass = parseInt(r[1]);
-                var targetName = r[3] ? r[3].toString().trim() : "";
-                var scoreStr = r[4];
+                var evaluatorText = r[1] ? r[1].toString() : "";
+                var match = evaluatorText.match(/(\d+)반/);
+                var evalClass = match ? parseInt(match[1]) : NaN;
+
+                var targetName = r[2] ? r[2].toString().trim() : "";
+                var scoreStr = r[3];
                 if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
 
                 var key = evalClass + "_" + targetName;
@@ -811,11 +821,14 @@
                 rawScores.seller[key].push(scoreMap[scoreStr]);
             });
 
-            // 🚀 [v40 리팩토링 정렬] 수리된 수집 구조 매핑 적용
+            // 2. 구매자 평가 파싱
             globalCloudDatabase.buyer.forEach(function(r){
-                var evalClass = parseInt(r[1]);
-                var targetName = r[3] ? r[3].toString().trim() : ""; // index 3번이 발표를 한 판매자(설명자) 학생명
-                var scoreStr = r[4]; // index 4번이 별점 평정 텍스트
+                var evaluatorText = r[1] ? r[1].toString() : "";
+                var match = evaluatorText.match(/(\d+)반/);
+                var evalClass = match ? parseInt(match[1]) : NaN;
+
+                var targetName = r[2] ? r[2].toString().trim() : "";
+                var scoreStr = r[3];
                 if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
 
                 var key = evalClass + "_" + targetName;
@@ -823,10 +836,14 @@
                 rawScores.buyer[key].push(scoreMap[scoreStr]);
             });
 
+            // 3. 동료 평가 파싱
             globalCloudDatabase.team.forEach(function(r){
-                var evalClass = parseInt(r[0]);
-                var targetName = r[2] ? r[2].toString().trim() : "";
-                var scoreStr = r[3];
+                var evaluatorText = r[0] ? r[0].toString() : "";
+                var match = evaluatorText.match(/(\d+)반/);
+                var evalClass = match ? parseInt(match[1]) : NaN;
+
+                var targetName = r[1] ? r[1].toString().trim() : "";
+                var scoreStr = r[2];
                 if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
 
                 var key = evalClass + "_" + targetName;
@@ -892,6 +909,7 @@
             }
         }
 
+        // 🚀 [v41 수리] 가독성 리포트 패널 텍스트 분석 매칭 필터 교정
         function renderIsolatedReportView(viewId, records, classNum, mode, modeStatObj) {
             var container = document.getElementById(viewId);
             container.innerHTML = '';
@@ -900,11 +918,13 @@
             for(var i=0; i<records.length; i++) {
                 var r = records[i]; if(!r || r.length < 4) continue;
                 
-                var evalClass = (mode === 3) ? parseInt(r[0]) : parseInt(r[1]);
+                var evaluatorText = (mode === 3) ? (r[0] || "") : (r[1] || "");
+                var match = evaluatorText.toString().match(/(\d+)반/);
+                var evalClass = match ? parseInt(match[1]) : NaN;
+                
                 if(isNaN(evalClass) || evalClass !== parseInt(classNum)) continue; 
 
-                // 🚀 [v40 인덱스 주입 수리] mode2일 때 피평가자 이름을 정확히 index 3번에서 축출
-                var targetName = (mode === 1) ? r[3] : (mode === 2 ? r[3] : r[2]); 
+                var targetName = (mode === 1 || mode === 2) ? r[2] : r[1]; 
                 if(!targetName) continue;
                 targetName = targetName.toString().trim();
 
@@ -932,12 +952,11 @@
                 for(var k=0; k<list.length; k++) {
                     var item = list[k]; html += '<tr>';
                     if(mode === 1) {
-                        html += '<td style="width:12%;">회차: ' + item[0] + '</td><td>평가자(판매자): ' + item[2] + '</td><td style="font-weight:bold; color:magenta;">구매자 태도: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
+                        html += '<td style="width:12%;">회차: ' + item[0] + '</td><td>평가자(판매자): ' + item[1] + '</td><td style="font-weight:bold; color:magenta;">구매자 태도: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
                     } else if(mode === 2) {
-                        // 🚀 [v40 리포트 패널 노출 인덱스 수리 완료]
-                        html += '<td style="width:15%;">부스: ' + item[0] + '</td><td>평가자(구매자): ' + item[2] + '</td><td style="font-weight:bold; color:purple;">설명 발표: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
+                        html += '<td style="width:15%;">부스: ' + item[0] + '</td><td>평가자(구매자): ' + item[1] + '</td><td style="font-weight:bold; color:purple;">설명 발표: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
                     } else if(mode === 3) {
-                        html += '<td>평가자(조원): ' + item[1] + '</td><td style="font-weight:bold; color:blue;">기여도점수: ' + item[3] + '</td><td style="text-align:left; background:#fffaf0;">✍️ 구체적 사유: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
+                        html += '<td>평가자(조원): ' + item[0] + '</td><td style="font-weight:bold; color:blue;">기여도점수: ' + item[2] + '</td><td style="text-align:left; background:#fffaf0;">✍️ 구체적 사유: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
                     }
                     html += '</tr>';
                 }
