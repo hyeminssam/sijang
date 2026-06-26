@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v41</title>
+    <title>지식시장 수행평가 종합 시스템 v42</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -39,7 +39,6 @@
         input:focus, select:focus, textarea:focus { border-color: var(--secondary-color); }
 
         .info-text { background-color: #f1f5f9; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 20px; font-size: 0.92rem; border-left: 4px solid var(--primary-color); }
-        .alert-text { background-color: var(--warning-color); padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #c53030; font-weight: bold; margin-bottom: 15px; text-align: center;}
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .btn-menu { background-color: #f8fafc; border: 2px solid #e2e8f0; padding: 20px; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: bold; text-align: center; transition: all 0.2s; }
@@ -117,7 +116,7 @@
 
         <div id="pageLogin" class="page active">
             <h2>지식시장 로그인 및 계정 등록</h2>
-            <div class="alert-text">⚠️ 5열 원래 시트 포맷 구조를 지키며 동명이인을 격리하는 v41 교정 엔진이 탑재되었습니다.</div>
+            <div style="height:10px;"></div>
             
             <div class="form-grid">
                 <div>
@@ -294,7 +293,7 @@
                         <label class="radio-label"><input type="radio" name="selfScore" value="매우 미흡">매우 미흡</label>
                         <label class="radio-label"><input type="radio" name="selfScore" value="미흡">미흡</label>
                         <label class="radio-label"><input type="radio" name="selfScore" value="보통" checked>보통</label>
-                        <label class="macro-label"><input type="radio" name="selfScore" value="우수">우수</label>
+                        <label class="radio-label"><input type="radio" name="selfScore" value="우수">우수</label>
                         <label class="radio-label"><input type="radio" name="selfScore" value="매우 우수">매우 우수</label>
                     </div>
                     <label style="margin-top:12px; color: #c53030;">✍️ 스스로 배우고 성장한 점 및 반성할 점 (필수)</label>
@@ -348,9 +347,10 @@
         </div>
     </div>
 
+    <!-- ================= [교사 전용 관제 대시보드] ================= -->
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
-        <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료 (★원래 5열 구조 복구 & 평가자 반 기준 분리 활성화)</p>
+        <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료 (★전래 5열 완벽 매칭 리포트 엔진 세팅)</p>
         
         <h3>⚙️ 학생단 접속 메뉴 활성화 스위치 (실시간 제어)
             <button class="btn-toggle-view" onclick="toggleSection('sec_switch')">접기/펼치기</button>
@@ -401,17 +401,17 @@
             </div>
         </div>
 
-        <h3>📊 1. 구매자 태도 분석 리포트 (원래 5열 저장 및 평가자 반 격리)
+        <h3>📊 1. 구매자 태도 분석 리포트 (기존 정상 작동 버전 롤백 완료)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report1')">접기/펼치기</button>
         </h3>
         <div id="sec_report1" class="section-content collapsed"><div id="groupedSellerView"></div></div>
 
-        <h3>📊 2. 판매자 발표 분석 리포트 (원래 5열 저장 및 평가자 반 격리)
+        <h3>📊 2. 판매자 발표 분석 리포트 (5열 수정 반영 및 평가자 반 격리 완료)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report2')">접기/펼치기</button>
         </h3>
         <div id="sec_report2" class="section-content collapsed"><div id="groupedBuyerView"></div></div>
 
-        <h3>📊 3. 조원 동료 상호 평가 사유 리포트 (원래 5열 저장 및 평가자 반 격리)
+        <h3>📊 3. 조원 동료 상호 평가 사유 리포트
             <button class="btn-toggle-view" onclick="toggleSection('sec_report3')">접기/펼치기</button>
         </h3>
         <div id="sec_report3" class="section-content collapsed"><div id="groupedTeamView"></div></div>
@@ -433,6 +433,9 @@
         <button class="btn-block btn-back" style="background:#4a5568; color:#fff;" onclick="goMainFromAdmin()">교사 관리 종료 (대문으로)</button>
     </div>
 
+    <!-- =============================================================
+                        JAVASCRIPT CORE ENGINE v42
+         ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwUGraJnr3KF1Fpob9kR7y6e6nS_s10R9WO5ti5y1VrBz7VutZ9mNCbLboLomA9RzwbQ/exec";
 
@@ -660,7 +663,7 @@
         function handleLogout() { switchPage('pageLogin'); }
         function exitSubPage() { switchPage('pageMenu'); }
 
-        // 🚀 [v41 수리] 원래대로 [조이름, 평가자, 평가대상자, 척도, 시간] 딱 5개 항목 순서 유지
+        // 1. 판매자 평가 (구매자 태도) -> 원래 포환대로 전송
         function submitSellerEval(event) {
             event.preventDefault();
             var round = document.getElementById('sellerRound').value;
@@ -669,7 +672,6 @@
                 var name = document.getElementById("buyerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='buyerAttitude" + i + "']:checked").value;
-                    // 평가자 이름에 반 정보 강제 주입: 예) "1반 조혜민"
                     var compositeEvaluator = currentSessionUser.classNum + "반 " + currentSessionUser.name;
                     sendToGoogleDatabase('seller', [round, compositeEvaluator, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
@@ -679,6 +681,7 @@
             exitSubPage();
         }
 
+        // 2. 구매자 평가 (판매자 발표) -> 원래 5열구조 포맷 유지 및 평가자 반 텍스트 주입
         function submitBuyerEval(event) {
             event.preventDefault();
             var booth = document.getElementById('buyerBooth').value;
@@ -687,7 +690,6 @@
                 var name = document.getElementById("sellerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='sellerScore" + i + "']:checked").value;
-                    // 평가자 이름에 반 정보 강제 주입하여 5열 구조 사수
                     var compositeEvaluator = currentSessionUser.classNum + "반 " + currentSessionUser.name;
                     sendToGoogleDatabase('buyer', [booth, compositeEvaluator, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
@@ -702,7 +704,6 @@
             var target = document.getElementById('teamTargetName').value.trim();
             var score = document.querySelector("input[name='teamScore']:checked").value;
             var reason = document.getElementById('teamReason').value.trim();
-            // 평가자 이름 앞에 반을 결합하여 5열 구조 사수
             var compositeEvaluator = currentSessionUser.classNum + "반 " + currentSessionUser.name;
             sendToGoogleDatabase('team', [compositeEvaluator, target, score, reason, new Date().toLocaleTimeString()]);
             alert('동료 평가가 정상 제출되었습니다!'); exitSubPage();
@@ -773,7 +774,7 @@
 
             var csvContent = "\ufeff"; 
             for(var c=1; c<=7; c++) {
-                csvContent += "=== 1학년 " + c + "반 상호평가 정밀 격리 리포트 (텍스트 분석 기반) ===\n";
+                csvContent += "=== 1학년 " + c + "반 상호평가 정밀 격리 리포트 ===\n";
                 csvContent += "번호,성명,판매자태도평균(5점),구매자발표평균(5점),동료기여도평균(5점)\n";
                 
                 var currentClassStudents = globalCloudDatabase.accounts.filter(function(u){ return parseInt(u[0]) === c; });
@@ -802,11 +803,10 @@
             link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        // 🚀 [v41 수리] 원래 저장된 텍스트 형식 속에서 "평가자의 반"을 유추하여 격리 정밀 연산
         function compileAveragesByEvaluatorClass() {
             var rawScores = { seller: {}, buyer: {}, team: {} };
 
-            // 1. 판매자 평가 파싱 (인덱스 1번에 "X반 성명" 형태 파싱)
+            // 1. 판매자 평가 파싱 
             globalCloudDatabase.seller.forEach(function(r){
                 var evaluatorText = r[1] ? r[1].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -821,7 +821,7 @@
                 rawScores.seller[key].push(scoreMap[scoreStr]);
             });
 
-            // 2. 구매자 평가 파싱
+            // 2. 구매자 평가 파싱 (판매자 발표 분석)
             globalCloudDatabase.buyer.forEach(function(r){
                 var evaluatorText = r[1] ? r[1].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -898,7 +898,9 @@
             }
             if(!hasAccount) accountTbody.innerHTML = '<tr><td colspan="13" style="color:#aaa; padding:20px;">가입 명부가 비어 있습니다.</td></tr>';
 
-            renderIsolatedReportView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, 1, stats.seller);
+            // 🎯 1번 리포트(구매자 태도)는 기존 원본 로직으로 완벽하게 안전 롤백
+            renderOriginalSellerReportView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, stats.seller);
+            // 🎯 2번 리포트(판매자 발표)만 정밀 수정 로직 유지
             renderIsolatedReportView('groupedBuyerView', globalCloudDatabase.buyer, activeAccountClass, 2, stats.buyer);
             renderIsolatedReportView('groupedTeamView', globalCloudDatabase.team, activeAccountClass, 3, stats.team);
 
@@ -909,7 +911,42 @@
             }
         }
 
-        // 🚀 [v41 수리] 가독성 리포트 패널 텍스트 분석 매칭 필터 교정
+        // 🎯 [롤백 완료] 1번 구매자 태도 분석 리포트 전용 원본 매칭 뷰어
+        function renderOriginalSellerReportView(viewId, records, classNum, modeStatObj) {
+            var container = document.getElementById(viewId); container.innerHTML = '';
+            var groups = {}; var hasData = false;
+            for(var i=0; i<records.length; i++) {
+                var r = records[i]; if (!r || r.length < 3) continue;
+                var evaluatorText = r[1] ? r[1].toString() : "";
+                var match = evaluatorText.match(/(\d+)반/);
+                var evalClass = match ? parseInt(match[1]) : NaN;
+                if (isNaN(evalClass) || evalClass !== parseInt(classNum)) continue;
+                var targetName = r[2] ? r[2].toString().trim() : "미정";
+                if(!groups[targetName]) groups[targetName] = []; groups[targetName].push(r);
+            }
+            for(var targetName in groups) {
+                hasData = true; var rawList = groups[targetName]; var uniqueUserCheck = {}; var filteredList = [];
+                for(var m = rawList.length - 1; m >= 0; m--) {
+                    var item = rawList[m]; var evalKey = item[1] + "_" + item[0];
+                    if(!uniqueUserCheck[evalKey]) { uniqueUserCheck[evalKey] = true; filteredList.unshift(item); }
+                }
+                var sKey = classNum + "_" + targetName; var stat = modeStatObj[sKey];
+                var avgText = "평가 기록 없음";
+                if(stat) avgText = "⭐ 오직 " + classNum + "반 학생들이 평정한 5점 만점 환산 평균: [ " + stat.avg + " 점 ] / 유효 평가 참여수: " + stat.count + "회";
+                var html = '<div class="class-section" style="border-left: 5px solid var(--secondary-color);">' +
+                           '<p style="font-weight:bold; margin-bottom:4px; color:#2c5282;">🎯 피평가 대상자 학생: [ ' + targetName + ' ]</p>' +
+                           '<p style="font-size:0.85rem; color:#4a5568; font-weight:bold; margin-bottom:8px; background:#edf2f7; padding:6px; border-radius:4px;">' + avgText + '</p>' +
+                           '<div class="table-wrapper"><table><tbody>';
+                for(var k=0; k<filteredList.length; k++) {
+                    var item = filteredList[k];
+                    html += '<tr><td style="width:12%;">회차: ' + item[0] + '</td><td>평가한 사람: ' + item[1] + '</td><td style="font-weight:bold; color:magenta;">태도평정: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td></tr>';
+                }
+                html += '</tbody></table></div></div>'; container.innerHTML += html;
+            }
+            if(!hasData) container.innerHTML = '<p style="color:#aaa; text-align:center; padding:15px;">해당 반의 데이터가 비어 있습니다.</p>';
+        }
+
+        // 🎯 2번 및 3번용 텍스트 분석 매칭 필터 교정 뷰어
         function renderIsolatedReportView(viewId, records, classNum, mode, modeStatObj) {
             var container = document.getElementById(viewId);
             container.innerHTML = '';
@@ -924,7 +961,7 @@
                 
                 if(isNaN(evalClass) || evalClass !== parseInt(classNum)) continue; 
 
-                var targetName = (mode === 1 || mode === 2) ? r[2] : r[1]; 
+                var targetName = (mode === 2) ? r[2] : r[1]; 
                 if(!targetName) continue;
                 targetName = targetName.toString().trim();
 
@@ -951,9 +988,7 @@
 
                 for(var k=0; k<list.length; k++) {
                     var item = list[k]; html += '<tr>';
-                    if(mode === 1) {
-                        html += '<td style="width:12%;">회차: ' + item[0] + '</td><td>평가자(판매자): ' + item[1] + '</td><td style="font-weight:bold; color:magenta;">구매자 태도: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
-                    } else if(mode === 2) {
+                    if(mode === 2) {
                         html += '<td style="width:15%;">부스: ' + item[0] + '</td><td>평가자(구매자): ' + item[1] + '</td><td style="font-weight:bold; color:purple;">설명 발표: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
                     } else if(mode === 3) {
                         html += '<td>평가자(조원): ' + item[0] + '</td><td style="font-weight:bold; color:blue;">기여도점수: ' + item[2] + '</td><td style="text-align:left; background:#fffaf0;">✍️ 구체적 사유: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
