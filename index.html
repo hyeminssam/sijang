@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v38</title>
+    <title>지식시장 수행평가 종합 시스템 v39</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -117,7 +117,7 @@
 
         <div id="pageLogin" class="page active">
             <h2>지식시장 로그인 및 계정 등록</h2>
-            <div class="alert-text">⚠️ 비밀번호는 숫자가 지워지지 않게 텍스트 연동 엔진이 추가되었습니다. <br>팅겨도 같은 반/번호/이름과 설정한 비밀번호를 치면 작성기록이 복구됩니다.</div>
+            <div class="alert-text">⚠️ 평가자가 소속된 '반'을 기반으로 동명이인을 원천 분리하는 격리 엔진이 적용되었습니다.<br>안심하고 같은 반/번호/이름으로 로그인 및 평가를 진행해 주세요.</div>
             
             <div class="form-grid">
                 <div>
@@ -350,7 +350,7 @@
 
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
-        <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료 (반별 동명이인 자동 정밀 분리 활성화)</p>
+        <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료 (★평가자 소속 반 기준 완전 격리 모드 활성화)</p>
         
         <h3>⚙️ 학생단 접속 메뉴 활성화 스위치 (실시간 제어)
             <button class="btn-toggle-view" onclick="toggleSection('sec_switch')">접기/펼치기</button>
@@ -401,17 +401,17 @@
             </div>
         </div>
 
-        <h3>📊 1. 구매자 태도 분석 리포트 (우리 반 피드백만 격리 추출)
+        <h3>📊 1. 구매자 태도 분석 리포트 (평가자 반 기준 완전 격리)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report1')">접기/펼치기</button>
         </h3>
         <div id="sec_report1" class="section-content collapsed"><div id="groupedSellerView"></div></div>
 
-        <h3>📊 2. 판매자 발표 분석 리포트 (우리 반 피드백만 격리 추출)
+        <h3>📊 2. 판매자 발표 분석 리포트 (평가자 반 기준 완전 격리)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report2')">접기/펼치기</button>
         </h3>
         <div id="sec_report2" class="section-content collapsed"><div id="groupedBuyerView"></div></div>
 
-        <h3>📊 3. 조원 동료 상호 평가 사유 리포트 (우리 반 피드백만 격리 추출)
+        <h3>📊 3. 조원 동료 상호 평가 사유 리포트 (평가자 반 기준 완전 격리)
             <button class="btn-toggle-view" onclick="toggleSection('sec_report3')">접기/펼치기</button>
         </h3>
         <div id="sec_report3" class="section-content collapsed"><div id="groupedTeamView"></div></div>
@@ -672,8 +672,8 @@
                 var name = document.getElementById("buyerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='buyerAttitude" + i + "']:checked").value;
-                    // 반 구분을 위해 인덱스 1번에 명확하게 학반 숫자 기록
-                    sendToGoogleDatabase('seller', [round, parseInt(currentSessionUser.classNum), "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
+                    // 🎯 중요: 인덱스 1번 자리에 "평가자(작성한 사람)의 반"을 확실하게 기록하여 격리
+                    sendToGoogleDatabase('seller', [round, parseInt(currentSessionUser.classNum), currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
             }
@@ -689,8 +689,8 @@
                 var name = document.getElementById("sellerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='sellerScore" + i + "']:checked").value;
-                    // 평가자의 소속 반을 보장하기 위해 인덱스 1번에 학반 숫자 함께 기록
-                    sendToGoogleDatabase('buyer', [booth, parseInt(currentSessionUser.classNum), name, score, new Date().toLocaleTimeString(), "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name]);
+                    // 🎯 중요: 인덱스 1번 자리에 "평가자(작성한 사람)의 반"을 확실하게 기록하여 격리
+                    sendToGoogleDatabase('buyer', [booth, parseInt(currentSessionUser.classNum), name, score, new Date().toLocaleTimeString(), currentSessionUser.name]);
                     hasSubmitted = true;
                 }
             }
@@ -703,7 +703,8 @@
             var target = document.getElementById('teamTargetName').value.trim();
             var score = document.querySelector("input[name='teamScore']:checked").value;
             var reason = document.getElementById('teamReason').value.trim();
-            sendToGoogleDatabase('team', [parseInt(currentSessionUser.classNum), "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name, target, score, reason, new Date().toLocaleTimeString()]);
+            // 🎯 중요: 인덱스 0번 자리에 "평가자(작성한 사람)의 반"을 확실하게 기록하여 격리
+            sendToGoogleDatabase('team', [parseInt(currentSessionUser.classNum), currentSessionUser.name, target, score, reason, new Date().toLocaleTimeString()]);
             alert('동료 평가가 정상 제출되었습니다!'); exitSubPage();
         }
 
@@ -762,187 +763,108 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ type: 'batch_scores_sync', data: activeRows })
             }).then(function(){
-                alert('👍 ' + activeAccountClass + '반 전체 학생의 100점 만점 환산 성적이 스프레드시트에 완벽히 동기화되었습니다!');
+                alert('👍 ' + activeAccountClass + '반 전체 학생의 성적이 데이터베이스에 완벽히 저장되었습니다.');
                 fetchAllDataFromGoogle(); 
             });
         }
 
-        // 🎯 [v38 격리 로직 수립] 학반 격리 검증을 통한 통계 파일 추출
+        // 🎯 [v39 완전 핵심] 평가자 반 기준으로만 상호평가 통계를 추출하여 CSV 다운로드
         function downloadAllClassAveragesCSV() {
-            var liveStatsUnique = { seller: {}, buyer: {}, team: {} };
-            
-            globalCloudDatabase.seller.forEach(function(r){
-                var round = r[0]; 
-                var itemClass = parseInt(r[1]); 
-                var evaluator = r[2] ? r[2].toString().trim() : ""; 
-                var targetName = r[3] ? r[3].toString().trim() : ""; 
-                if(!targetName || isNaN(itemClass)) return;
-                
-                var uniqueKey = itemClass + "_" + evaluator + "_" + targetName + "_" + round;
-                if(scoreMap[r[4]]) liveStatsUnique.seller[uniqueKey] = { classNum: itemClass, name: targetName, score: scoreMap[r[4]] };
-            });
-
-            globalCloudDatabase.buyer.forEach(function(r){
-                var booth = r[0]; 
-                var itemClass = parseInt(r[1]);
-                var targetName = r[2] ? r[2].toString().trim() : "";
-                var evaluator = r[5] ? r[5].toString().trim() : (r[1] ? r[1].toString().trim() : "");
-                if (isNaN(itemClass) && r[5]) {
-                    var matchResult = r[5].toString().match(/(\d+)반/);
-                    if(matchResult) itemClass = parseInt(matchResult[1]);
-                }
-                if(!targetName || isNaN(itemClass)) return;
-                
-                var uniqueKey = itemClass + "_" + evaluator + "_" + targetName + "_" + booth;
-                if(scoreMap[r[3]]) liveStatsUnique.buyer[uniqueKey] = { classNum: itemClass, name: targetName, score: scoreMap[r[3]] };
-            });
-
-            globalCloudDatabase.team.forEach(function(r){
-                var itemClass = parseInt(r[0]); 
-                var evaluator = r[1] ? r[1].toString().trim() : ""; 
-                var targetName = r[2] ? r[2].toString().trim() : "";
-                if(!targetName || isNaN(itemClass)) return;
-                
-                var uniqueKey = itemClass + "_" + evaluator + "_" + targetName;
-                if(scoreMap[r[3]]) liveStatsUnique.team[uniqueKey] = { classNum: itemClass, name: targetName, score: scoreMap[r[3]] };
-            });
-
-            var stats = { seller: {}, buyer: {}, team: {} };
-            Object.keys(liveStatsUnique.seller).forEach(function(k){ 
-                var obj = liveStatsUnique.seller[k]; 
-                var sKey = obj.classNum + "_" + obj.name;
-                if(!stats.seller[sKey]) stats.seller[sKey] = []; 
-                stats.seller[sKey].push(obj.score); 
-            });
-            Object.keys(liveStatsUnique.buyer).forEach(function(k){ 
-                var obj = liveStatsUnique.buyer[k]; 
-                var bKey = obj.classNum + "_" + obj.name;
-                if(!stats.buyer[bKey]) stats.buyer[bKey] = []; 
-                stats.buyer[bKey].push(obj.score); 
-            });
-            Object.keys(liveStatsUnique.team).forEach(function(k){ 
-                var obj = liveStatsUnique.team[k]; 
-                var tKey = obj.classNum + "_" + obj.name;
-                if(!stats.team[tKey]) stats.team[tKey] = []; 
-                stats.team[tKey].push(obj.score); 
-            });
-
-            var accs = globalCloudDatabase.accounts;
-            if(accs.length === 0) { alert("가입된 학생 명부 데이터가 없습니다."); return; }
-
-            var classBuckets = {};
-            for(var i=0; i<7; i++) { classBuckets[i+1] = []; }
-
-            accs.forEach(function(u){
-                var cNum = parseInt(u[0]); var sNum = parseInt(u[1]); var name = u[2] ? u[2].toString().trim() : "";
-                if(classBuckets[cNum]) {
-                    var sKey = cNum + "_" + name;
-                    var sArr = stats.seller[sKey] || []; 
-                    var bArr = stats.buyer[sKey] || []; 
-                    var tArr = stats.team[sKey] || [];
-                    
-                    var sAvg = sArr.length > 0 ? (sArr.reduce((a,b)=>a+b,0)/sArr.length).toFixed(2) : "0.00";
-                    var bAvg = bArr.length > 0 ? (bArr.reduce((a,b)=>a+b,0)/bArr.length).toFixed(2) : "0.00";
-                    var tAvg = tArr.length > 0 ? (tArr.reduce((a,b)=>a+b,0)/tArr.length).toFixed(2) : "0.00";
-                    classBuckets[cNum].push({ number: sNum, name: name, sellerAvg: sAvg, buyerAvg: bAvg, teamAvg: tAvg });
-                }
-            });
+            var stats = compileAveragesByEvaluatorClass();
 
             var csvContent = "\ufeff"; 
             for(var c=1; c<=7; c++) {
-                var currentList = classBuckets[c]; currentList.sort(function(a, b){ return a.number - b.number; });
-                csvContent += "=== 1학년 " + c + "반 상호평가 통계 격리 리포트 ===\n";
+                csvContent += "=== 1학년 " + c + "반 상호평가 정밀 격리 리포트 (평가자 반 기준) ===\n";
                 csvContent += "번호,성명,판매자태도평균(5점),구매자발표평균(5점),동료기여도평균(5점)\n";
-                if(currentList.length === 0) csvContent += "등록된 학생이 없습니다.,,,,\n";
-                else { currentList.forEach(function(row){ csvContent += row.number + "," + row.name + "," + row.sellerAvg + "," + row.buyerAvg + "," + row.teamAvg + "\n"; }); }
+                
+                var currentClassStudents = globalCloudDatabase.accounts.filter(function(u){ return parseInt(u[0]) === c; });
+                currentClassStudents.sort(function(a, b){ return parseInt(a[1]) - parseInt(b[1]); });
+
+                if(currentClassStudents.length === 0) {
+                    csvContent += "등록된 학생이 없습니다.,,,,\n";
+                } else {
+                    currentClassStudents.forEach(function(u){
+                        var name = u[2] ? u[2].toString().trim() : "";
+                        var sKey = c + "_" + name;
+                        
+                        var sAvg = stats.seller[sKey] ? stats.seller[sKey].avg : "0.00";
+                        var bAvg = stats.buyer[sKey] ? stats.buyer[sKey].avg : "0.00";
+                        var tAvg = stats.team[sKey] ? stats.team[sKey].avg : "0.00";
+                        
+                        csvContent += u[1] + "," + name + "," + sAvg + "," + bAvg + "," + tAvg + "\n";
+                    });
+                }
                 csvContent += "\n\n"; 
             }
 
             var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             var link = document.createElement("a"); var url = URL.createObjectURL(blob);
-            link.setAttribute("href", url); link.setAttribute("download", "지식시장_반별격리_상호평가평균통계.csv");
+            link.setAttribute("href", url); link.setAttribute("download", "지식시장_평가자반기준_상호평가통계.csv");
             link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        // 🎯 [v38 격리 로직 수립] 학반 격리 검증을 통한 관제 UI 렌더링
-        function processGroupingForClass(records, classNum, mode) {
-            var groups = {};
-            for(var i=0; i<records.length; i++) {
-                var r = records[i]; if (!r || r.length < 3) continue;
-                var itemClass = parseInt(r[1]);
-                
-                if (mode === 2) { 
-                    if (r[5]) {
-                        var matchResult = r[5].toString().match(/(\d+)반/);
-                        if(matchResult) itemClass = parseInt(matchResult[1]);
-                    }
-                }
-                
-                if (isNaN(itemClass) || itemClass !== parseInt(classNum)) continue;
-                var targetName = (mode === 1) ? (r[3] || "미정") : (r[2] || "미정"); targetName = targetName.toString().trim();
-                if(!groups[targetName]) groups[targetName] = []; groups[targetName].push(r);
-            }
-            return groups;
+        // 🎯 [v39 핵심 연산 로직] 평가자 소속 반 내부 데이터만 수집하여 스코어 매핑
+        function compileAveragesByEvaluatorClass() {
+            var rawScores = { seller: {}, buyer: {}, team: {} };
+
+            // 1. 판매자 평가 (구매자 태도 분석) -> index 1: 평가자(판매자)의 반, index 3: 피평가자(방문구매자) 이름
+            globalCloudDatabase.seller.forEach(function(r){
+                var evalClass = parseInt(r[1]);
+                var targetName = r[3] ? r[3].toString().trim() : "";
+                var scoreStr = r[4];
+                if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
+
+                var key = evalClass + "_" + targetName;
+                if(!rawScores.seller[key]) rawScores.seller[key] = [];
+                rawScores.seller[key].push(scoreMap[scoreStr]);
+            });
+
+            // 2. 구매자 평가 (판매자 발표 분석) -> index 1: 평가자(구매자)의 반, index 2: 피평가자(부스판매자) 이름
+            globalCloudDatabase.buyer.forEach(function(r){
+                var evalClass = parseInt(r[1]);
+                var targetName = r[2] ? r[2].toString().trim() : "";
+                var scoreStr = r[3];
+                if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
+
+                var key = evalClass + "_" + targetName;
+                if(!rawScores.buyer[key]) rawScores.buyer[key] = [];
+                rawScores.buyer[key].push(scoreMap[scoreStr]);
+            });
+
+            // 3. 동료 평가 -> index 0: 평가자(조원)의 반, index 2: 피평가자(대상조원) 이름
+            globalCloudDatabase.team.forEach(function(r){
+                var evalClass = parseInt(r[0]);
+                var targetName = r[2] ? r[2].toString().trim() : "";
+                var scoreStr = r[3];
+                if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
+
+                var key = evalClass + "_" + targetName;
+                if(!rawScores.team[key]) rawScores.team[key] = [];
+                rawScores.team[key].push(scoreMap[scoreStr]);
+            });
+
+            // 평균값 환산 객체 빌드
+            var finalStats = { seller: {}, buyer: {}, team: {} };
+            ['seller', 'buyer', 'team'].forEach(function(mode){
+                Object.keys(rawScores[mode]).forEach(function(key){
+                    var arr = rawScores[mode][key];
+                    var sum = arr.reduce(function(a,b){return a+b;}, 0);
+                    finalStats[mode][key] = {
+                        avg: (sum / arr.length).toFixed(2),
+                        count: arr.length
+                    };
+                });
+            });
+            return finalStats;
         }
 
+        // 🎯 [v39 관제 UI 렌더링 리팩토링]
         function renderAdminDashboard() {
             var accountTbody = document.getElementById('adminUserAccountTable');
             accountTbody.innerHTML = ''; var hasAccount = false;
             
-            var liveStatsUnique = { seller: {}, buyer: {}, team: {} };
-            
-            globalCloudDatabase.seller.forEach(function(r){
-                var round = r[0]; 
-                var itemClass = parseInt(r[1]); 
-                var evaluator = r[2] ? r[2].toString().trim() : ""; 
-                var targetName = r[3] ? r[3].toString().trim() : ""; 
-                if(targetName && evaluator && !isNaN(itemClass) && scoreMap[r[4]]) {
-                    liveStatsUnique.seller[itemClass + "_" + evaluator + "_" + targetName + "_" + round] = { classNum: itemClass, name: targetName, score: scoreMap[r[4]] };
-                }
-            });
-
-            globalCloudDatabase.buyer.forEach(function(r){
-                var booth = r[0]; 
-                var itemClass = parseInt(r[1]); 
-                var targetName = r[2] ? r[2].toString().trim() : "";
-                var evaluator = r[5] ? r[5].toString().trim() : (r[1] ? r[1].toString().trim() : "");
-                if (isNaN(itemClass) && r[5]) {
-                    var matchResult = r[5].toString().match(/(\d+)반/);
-                    if(matchResult) itemClass = parseInt(matchResult[1]);
-                }
-                if(targetName && !isNaN(itemClass) && scoreMap[r[3]]) {
-                    liveStatsUnique.buyer[itemClass + "_" + evaluator + "_" + targetName + "_" + booth] = { classNum: itemClass, name: targetName, score: scoreMap[r[3]] };
-                }
-            });
-
-            globalCloudDatabase.team.forEach(function(r){
-                var itemClass = parseInt(r[0]); 
-                var evaluator = r[1] ? r[1].toString().trim() : ""; 
-                var targetName = r[2] ? r[2].toString().trim() : "";
-                if(targetName && evaluator && !isNaN(itemClass) && scoreMap[r[3]]) {
-                    liveStatsUnique.team[itemClass + "_" + evaluator + "_" + targetName] = { classNum: itemClass, name: targetName, score: scoreMap[r[3]] };
-                }
-            });
-
-            var stats = { seller: {}, buyer: {}, team: {} };
-            Object.keys(liveStatsUnique.seller).forEach(function(k){ 
-                var obj = liveStatsUnique.seller[k]; 
-                var sKey = obj.classNum + "_" + obj.name;
-                if(!stats.seller[sKey]) stats.seller[sKey] = []; 
-                stats.seller[sKey].push(obj.score); 
-            });
-            Object.keys(liveStatsUnique.buyer).forEach(function(k){ 
-                var obj = liveStatsUnique.buyer[k]; 
-                var bKey = obj.classNum + "_" + obj.name;
-                if(!stats.buyer[bKey]) stats.buyer[bKey] = []; 
-                stats.buyer[bKey].push(obj.score); 
-            });
-            Object.keys(liveStatsUnique.team).forEach(function(k){ 
-                var obj = liveStatsUnique.team[k]; 
-                var tKey = obj.classNum + "_" + obj.name;
-                if(!stats.team[tKey]) stats.team[tKey] = []; 
-                stats.team[tKey].push(obj.score); 
-            });
+            // 평가자 반 기준 최신 평균 연산 데이터 로드
+            var stats = compileAveragesByEvaluatorClass();
 
             var accs = globalCloudDatabase.accounts.slice();
             accs.sort(function(a, b) { return parseInt(a[1]) - parseInt(b[1]); });
@@ -972,9 +894,10 @@
             }
             if(!hasAccount) accountTbody.innerHTML = '<tr><td colspan="13" style="color:#aaa; padding:20px;">가입 명부가 비어 있습니다.</td></tr>';
 
-            renderCloudGroupedView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, 1, stats.seller);
-            renderCloudGroupedView('groupedBuyerView', globalCloudDatabase.buyer, activeAccountClass, 2, stats.buyer);
-            renderCloudGroupedView('groupedTeamView', globalCloudDatabase.team, activeAccountClass, 3, stats.team);
+            // 관제센터 하단 서술형 리포트 패널 렌더링 호출
+            renderIsolatedReportView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, 1, stats.seller);
+            renderIsolatedReportView('groupedBuyerView', globalCloudDatabase.buyer, activeAccountClass, 2, stats.buyer);
+            renderIsolatedReportView('groupedTeamView', globalCloudDatabase.team, activeAccountClass, 3, stats.team);
 
             var selfTbody = document.getElementById('flatSelfTableBody'); selfTbody.innerHTML = ''; var selves = globalCloudDatabase.self;
             for(var j=0; j<selves.length; j++) {
@@ -983,32 +906,62 @@
             }
         }
 
-        function renderCloudGroupedView(viewId, records, classNum, mode, statObj) {
-            var container = document.getElementById(viewId); container.innerHTML = ''; var grouped = processGroupingForClass(records, classNum, mode); var hasData = false;
-            for(var targetName in grouped) {
-                hasData = true; var rawList = grouped[targetName]; var uniqueUserCheck = {}; var filteredList = [];
-                for(var m = rawList.length - 1; m >= 0; m--) {
-                    var item = rawList[m]; var evalKey = (mode === 1) ? item[2] + "_" + item[0] : (mode === 2) ? item[1] + "_" + item[0] : item[1];
-                    if(!uniqueUserCheck[evalKey]) { uniqueUserCheck[evalKey] = true; filteredList.unshift(item); }
-                }
+        // 🎯 [v39 리포트 엔진] 평가자 반 기준으로만 데이터를 묶어서 관제 대시보드 표출
+        function renderIsolatedReportView(viewId, records, classNum, mode, modeStatObj) {
+            var container = document.getElementById(viewId);
+            container.innerHTML = '';
+            
+            // 1단계: 조건에 맞는 레코드 필터링 및 학생별 그룹화
+            var studentGroups = {};
+            for(var i=0; i<records.length; i++) {
+                var r = records[i]; if(!r || r.length < 4) continue;
+                
+                var evalClass = (mode === 3) ? parseInt(r[0]) : parseInt(r[1]);
+                if(isNaN(evalClass) || evalClass !== parseInt(classNum)) continue; // 평가자 반이 일치하지 않으면 원천 배제
+
+                var targetName = (mode === 1) ? r[3] : r[2]; 
+                if(!targetName) continue;
+                targetName = targetName.toString().trim();
+
+                if(!studentGroups[targetName]) studentGroups[targetName] = [];
+                studentGroups[targetName].push(r);
+            }
+
+            var hasData = false;
+            for(var targetName in studentGroups) {
+                hasData = true;
+                var list = studentGroups[targetName];
                 
                 var sKey = classNum + "_" + targetName;
-                var rawArr = statObj[sKey] || []; var avgText = "평가 기록 없음";
-                if(rawArr.length > 0) { var sum = rawArr.reduce(function(a, b){ return a + b; }, 0); avgText = "⭐ 우리 반 친구들이 평정한 최신본 5점 만점 환산 평균: [ " + (sum / rawArr.length).toFixed(2) + " 점 ] / 유효 피평가 횟수: " + rawArr.length + "회"; }
+                var stat = modeStatObj[sKey];
+                var summaryText = "⚠️ 해당 반 친구들이 평가한 기록이 존재하지 않거나 연산 대기 중입니다.";
+                if(stat) {
+                    summaryText = "⭐ 오직 " + classNum + "반 학생들이 평정한 5점 만점 환산 평균: [ " + stat.avg + " 점 ] / 유효 평가 참여수: " + stat.count + "회";
+                }
+
                 var html = '<div class="class-section" style="border-left: 5px solid var(--secondary-color);">' +
                            '<p style="font-weight:bold; margin-bottom:4px; color:#2c5282;">🎯 피평가 대상자 학생: [ ' + targetName + ' ]</p>' +
-                           '<p style="font-size:0.85rem; color:#4a5568; font-weight:bold; margin-bottom:8px; background:#edf2f7; padding:6px; border-radius:4px;">' + avgText + '</p>' +
+                           '<p style="font-size:0.85rem; color:#4a5568; font-weight:bold; margin-bottom:8px; background:#edf2f7; padding:6px; border-radius:4px;">' + summaryText + '</p>' +
                            '<div class="table-wrapper"><table><tbody>';
-                for(var k=0; k<filteredList.length; k++) {
-                    var item = filteredList[k]; html += '<tr>';
-                    if(mode === 1) html += '<td style="width:10%;">포지션: 판매자</td><td style="width:15%;">' + item[0] + '</td><td>평가한 구매자: ' + item[2] + '</td><td style="font-weight:bold; color:magenta;">태도평정: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + ' (최신)</td>';
-                    else if(mode === 2) html += '<td style="width:10%;">포지션: 구매자</td><td style="width:15%;">' + item[0] + '</td><td>평가한 판매자: ' + item[2] + '</td><td style="font-weight:bold; color:purple;">발표평정: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + ' (최신)</td>';
-                    else if(mode === 3) html += '<td style="width:15%;">동료 상호평가</td><td>평가한 조원: ' + item[1] + '</td><td style="font-weight:bold; color:blue;">기여도평정: ' + item[3] + '</td><td style="text-align:left; background:#fffaf0;">✍️ 서술사유: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + ' (최신)</td>';
+
+                for(var k=0; k<list.length; k++) {
+                    var item = list[k]; html += '<tr>';
+                    if(mode === 1) {
+                        html += '<td style="width:12%;">회차: ' + item[0] + '</td><td>평가자(판매자): ' + item[2] + '</td><td style="font-weight:bold; color:magenta;">구매자 태도: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
+                    } else if(mode === 2) {
+                        html += '<td style="width:15%;">부스: ' + item[0] + '</td><td>평가자(구매자): ' + item[5] + '</td><td style="font-weight:bold; color:purple;">설명 발표: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
+                    } else if(mode === 3) {
+                        html += '<td>평가자(조원): ' + item[1] + '</td><td style="font-weight:bold; color:blue;">기여도점수: ' + item[3] + '</td><td style="text-align:left; background:#fffaf0;">✍️ 구체적 사유: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
+                    }
                     html += '</tr>';
                 }
-                html += '</tbody></table></div></div>'; container.innerHTML += html;
+                html += '</tbody></table></div></div>';
+                container.innerHTML += html;
             }
-            if(!hasData) container.innerHTML = '<p style="color:#aaa; text-align:center; padding:15px;">해당 반의 데이터가 비어 있습니다.</p>';
+
+            if(!hasData) {
+                container.innerHTML = '<p style="color:#aaa; text-align:center; padding:15px;">해당 반 학생들이 작성한 평가 데이터가 아직 없습니다.</p>';
+            }
         }
 
         function toggleSection(id) { var el = document.getElementById(id); if(el) el.classList.toggle('collapsed'); }
