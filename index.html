@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v39</title>
+    <title>지식시장 수행평가 종합 시스템 v40</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -131,7 +131,7 @@
                     <label>번호</label>
                     <select id="loginNumber" required>
                         <option value="">선택(번)</option>
-                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4번</option><option value="5">5번</option>
+                        <option value="1">1번</option><option value="2">2반</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
                         <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
                         <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
                         <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
@@ -147,7 +147,7 @@
                 <label>숫자 비밀번호 (4자리 설정)</label>
                 <input type="password" id="loginPw" maxlength="4" placeholder="자신이 원하는 비번 숫자 4자리">
             </div>
-            <button id="btnLoginAction" class="btn-block btn-submit" style="background-color: var(--primary-color); color:white;" onclick="handleLogin()">로그인 / 학생 등록하고 입장</button>
+            <div id="btnLoginAction" class="btn-block btn-submit" style="background-color: var(--primary-color); color:white; text-align:center;" onclick="handleLogin()">로그인 / 학생 등록하고 입장</div>
         </div>
 
         <div id="pageMenu" class="page">
@@ -539,7 +539,6 @@
 
             var loginBtn = document.getElementById('btnLoginAction');
             loginBtn.innerText = "데이터베이스 검증 중...";
-            loginBtn.disabled = true;
 
             fetch(WEB_APP_URL + "?action=fetchAllData")
                 .then(function(res) { return res.json(); })
@@ -570,7 +569,6 @@
                     if(isDuplicate학번) {
                         alert('❌ [가입 불가] 이미 다른 학생이 등록을 완료한 학번(반/번호)입니다.\n이름이나 비밀번호가 오타가 났는지 확인해 주세요!');
                         loginBtn.innerText = "로그인 / 학생 등록하고 입장";
-                        loginBtn.disabled = false;
                         return;
                     }
 
@@ -599,13 +597,11 @@
                             });
                             
                             loginBtn.innerText = "로그인 / 학생 등록하고 입장";
-                            loginBtn.disabled = false;
                             switchPage('pageMenu');
                         });
                 }).catch(function(err) {
                     alert("서버 연결에 실패했습니다.");
                     loginBtn.innerText = "로그인 / 학생 등록하고 입장";
-                    loginBtn.disabled = false;
                 });
         }
 
@@ -672,7 +668,6 @@
                 var name = document.getElementById("buyerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='buyerAttitude" + i + "']:checked").value;
-                    // 🎯 중요: 인덱스 1번 자리에 "평가자(작성한 사람)의 반"을 확실하게 기록하여 격리
                     sendToGoogleDatabase('seller', [round, parseInt(currentSessionUser.classNum), currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
@@ -681,6 +676,7 @@
             exitSubPage();
         }
 
+        // 🚀 [v40 핵심 정렬 수리] 배열 구조를 구글 시트 저장 엔진 순서와 일대일 정밀 동기화하여 undefined 버그 영구 격리
         function submitBuyerEval(event) {
             event.preventDefault();
             var booth = document.getElementById('buyerBooth').value;
@@ -689,8 +685,8 @@
                 var name = document.getElementById("sellerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='sellerScore" + i + "']:checked").value;
-                    // 🎯 중요: 인덱스 1번 자리에 "평가자(작성한 사람)의 반"을 확실하게 기록하여 격리
-                    sendToGoogleDatabase('buyer', [booth, parseInt(currentSessionUser.classNum), name, score, new Date().toLocaleTimeString(), currentSessionUser.name]);
+                    // 인덱스 순서 재정렬: [부스명, 평가자반, 평가자이름, 피평가자(판매자)이름, 평정단계, 작성시간]
+                    sendToGoogleDatabase('buyer', [booth, parseInt(currentSessionUser.classNum), currentSessionUser.name, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
             }
@@ -703,7 +699,6 @@
             var target = document.getElementById('teamTargetName').value.trim();
             var score = document.querySelector("input[name='teamScore']:checked").value;
             var reason = document.getElementById('teamReason').value.trim();
-            // 🎯 중요: 인덱스 0번 자리에 "평가자(작성한 사람)의 반"을 확실하게 기록하여 격리
             sendToGoogleDatabase('team', [parseInt(currentSessionUser.classNum), currentSessionUser.name, target, score, reason, new Date().toLocaleTimeString()]);
             alert('동료 평가가 정상 제출되었습니다!'); exitSubPage();
         }
@@ -768,7 +763,6 @@
             });
         }
 
-        // 🎯 [v39 완전 핵심] 평가자 반 기준으로만 상호평가 통계를 추출하여 CSV 다운로드
         function downloadAllClassAveragesCSV() {
             var stats = compileAveragesByEvaluatorClass();
 
@@ -803,11 +797,9 @@
             link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        // 🎯 [v39 핵심 연산 로직] 평가자 소속 반 내부 데이터만 수집하여 스코어 매핑
         function compileAveragesByEvaluatorClass() {
             var rawScores = { seller: {}, buyer: {}, team: {} };
 
-            // 1. 판매자 평가 (구매자 태도 분석) -> index 1: 평가자(판매자)의 반, index 3: 피평가자(방문구매자) 이름
             globalCloudDatabase.seller.forEach(function(r){
                 var evalClass = parseInt(r[1]);
                 var targetName = r[3] ? r[3].toString().trim() : "";
@@ -819,11 +811,11 @@
                 rawScores.seller[key].push(scoreMap[scoreStr]);
             });
 
-            // 2. 구매자 평가 (판매자 발표 분석) -> index 1: 평가자(구매자)의 반, index 2: 피평가자(부스판매자) 이름
+            // 🚀 [v40 리팩토링 정렬] 수리된 수집 구조 매핑 적용
             globalCloudDatabase.buyer.forEach(function(r){
                 var evalClass = parseInt(r[1]);
-                var targetName = r[2] ? r[2].toString().trim() : "";
-                var scoreStr = r[3];
+                var targetName = r[3] ? r[3].toString().trim() : ""; // index 3번이 발표를 한 판매자(설명자) 학생명
+                var scoreStr = r[4]; // index 4번이 별점 평정 텍스트
                 if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
 
                 var key = evalClass + "_" + targetName;
@@ -831,7 +823,6 @@
                 rawScores.buyer[key].push(scoreMap[scoreStr]);
             });
 
-            // 3. 동료 평가 -> index 0: 평가자(조원)의 반, index 2: 피평가자(대상조원) 이름
             globalCloudDatabase.team.forEach(function(r){
                 var evalClass = parseInt(r[0]);
                 var targetName = r[2] ? r[2].toString().trim() : "";
@@ -843,7 +834,6 @@
                 rawScores.team[key].push(scoreMap[scoreStr]);
             });
 
-            // 평균값 환산 객체 빌드
             var finalStats = { seller: {}, buyer: {}, team: {} };
             ['seller', 'buyer', 'team'].forEach(function(mode){
                 Object.keys(rawScores[mode]).forEach(function(key){
@@ -858,12 +848,9 @@
             return finalStats;
         }
 
-        // 🎯 [v39 관제 UI 렌더링 리팩토링]
         function renderAdminDashboard() {
             var accountTbody = document.getElementById('adminUserAccountTable');
             accountTbody.innerHTML = ''; var hasAccount = false;
-            
-            // 평가자 반 기준 최신 평균 연산 데이터 로드
             var stats = compileAveragesByEvaluatorClass();
 
             var accs = globalCloudDatabase.accounts.slice();
@@ -894,7 +881,6 @@
             }
             if(!hasAccount) accountTbody.innerHTML = '<tr><td colspan="13" style="color:#aaa; padding:20px;">가입 명부가 비어 있습니다.</td></tr>';
 
-            // 관제센터 하단 서술형 리포트 패널 렌더링 호출
             renderIsolatedReportView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, 1, stats.seller);
             renderIsolatedReportView('groupedBuyerView', globalCloudDatabase.buyer, activeAccountClass, 2, stats.buyer);
             renderIsolatedReportView('groupedTeamView', globalCloudDatabase.team, activeAccountClass, 3, stats.team);
@@ -906,20 +892,19 @@
             }
         }
 
-        // 🎯 [v39 리포트 엔진] 평가자 반 기준으로만 데이터를 묶어서 관제 대시보드 표출
         function renderIsolatedReportView(viewId, records, classNum, mode, modeStatObj) {
             var container = document.getElementById(viewId);
             container.innerHTML = '';
             
-            // 1단계: 조건에 맞는 레코드 필터링 및 학생별 그룹화
             var studentGroups = {};
             for(var i=0; i<records.length; i++) {
                 var r = records[i]; if(!r || r.length < 4) continue;
                 
                 var evalClass = (mode === 3) ? parseInt(r[0]) : parseInt(r[1]);
-                if(isNaN(evalClass) || evalClass !== parseInt(classNum)) continue; // 평가자 반이 일치하지 않으면 원천 배제
+                if(isNaN(evalClass) || evalClass !== parseInt(classNum)) continue; 
 
-                var targetName = (mode === 1) ? r[3] : r[2]; 
+                // 🚀 [v40 인덱스 주입 수리] mode2일 때 피평가자 이름을 정확히 index 3번에서 축출
+                var targetName = (mode === 1) ? r[3] : (mode === 2 ? r[3] : r[2]); 
                 if(!targetName) continue;
                 targetName = targetName.toString().trim();
 
@@ -949,7 +934,8 @@
                     if(mode === 1) {
                         html += '<td style="width:12%;">회차: ' + item[0] + '</td><td>평가자(판매자): ' + item[2] + '</td><td style="font-weight:bold; color:magenta;">구매자 태도: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
                     } else if(mode === 2) {
-                        html += '<td style="width:15%;">부스: ' + item[0] + '</td><td>평가자(구매자): ' + item[5] + '</td><td style="font-weight:bold; color:purple;">설명 발표: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
+                        // 🚀 [v40 리포트 패널 노출 인덱스 수리 완료]
+                        html += '<td style="width:15%;">부스: ' + item[0] + '</td><td>평가자(구매자): ' + item[2] + '</td><td style="font-weight:bold; color:purple;">설명 발표: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
                     } else if(mode === 3) {
                         html += '<td>평가자(조원): ' + item[1] + '</td><td style="font-weight:bold; color:blue;">기여도점수: ' + item[3] + '</td><td style="text-align:left; background:#fffaf0;">✍️ 구체적 사유: ' + item[4] + '</td><td style="color:#aaa;">' + item[5] + '</td>';
                     }
