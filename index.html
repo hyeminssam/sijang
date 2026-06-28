@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v43</title>
+    <title>지식시장 수행평가 종합 시스템 v44</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -131,7 +131,7 @@
                     <label>번호</label>
                     <select id="loginNumber" required>
                         <option value="">선택(번)</option>
-                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4번</option><option value="5">5번</option>
+                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
                         <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
                         <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
                         <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
@@ -348,6 +348,7 @@
         </div>
     </div>
 
+    <!-- ================= [교사 전용 관제 대시보드] ================= -->
     <div id="masterAdminContainer" class="admin-container">
         <h2>📊 지식시장 총괄 마스터 관제 센터</h2>
         <p style="text-align: center; color:green; font-weight:bold;">🟢 구글 데이터 양방향 실시간 동기화 완료 (반 내부 격리 매칭 엔진 정상 작동)</p>
@@ -433,6 +434,9 @@
         <button class="btn-block btn-back" style="background:#4a5568; color:#fff;" onclick="goMainFromAdmin()">교사 관리 종료 (대문으로)</button>
     </div>
 
+    <!-- =============================================================
+                        JAVASCRIPT CORE ENGINE v44
+         ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwUGraJnr3KF1Fpob9kR7y6e6nS_s10R9WO5ti5y1VrBz7VutZ9mNCbLboLomA9RzwbQ/exec";
 
@@ -660,6 +664,7 @@
         function handleLogout() { switchPage('pageLogin'); }
         function exitSubPage() { switchPage('pageMenu'); }
 
+        // 🎯 [교정] 판매자 데이터 전송 시 1학년 X반 포맷 및 순서 완벽 고정
         function submitSellerEval(event) {
             event.preventDefault();
             var round = document.getElementById('sellerRound').value;
@@ -668,8 +673,10 @@
                 var name = document.getElementById("buyerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='buyerAttitude" + i + "']:checked").value;
-                    var compositeEvaluator = currentSessionUser.classNum + "반 " + currentSessionUser.name;
-                    sendToGoogleDatabase('seller', [round, compositeEvaluator, name, score, new Date().toLocaleTimeString()]);
+                    var classText = "1학년 " + currentSessionUser.classNum + "반";
+                    var compositeEvaluator = "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name;
+                    // 기존 데이터 순서: [회차, 평가반, evaluator, 대상자, 평정, 시간]
+                    sendToGoogleDatabase('seller', [round, classText, compositeEvaluator, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
             }
@@ -685,7 +692,7 @@
                 var name = document.getElementById("sellerName" + i).value.trim();
                 if(name) {
                     var score = document.querySelector("input[name='sellerScore" + i + "']:checked").value;
-                    var compositeEvaluator = currentSessionUser.classNum + "반 " + currentSessionUser.name;
+                    var compositeEvaluator = "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name;
                     sendToGoogleDatabase('buyer', [booth, compositeEvaluator, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
@@ -699,7 +706,7 @@
             var target = document.getElementById('teamTargetName').value.trim();
             var score = document.querySelector("input[name='teamScore']:checked").value;
             var reason = document.getElementById('teamReason').value.trim();
-            var compositeEvaluator = currentSessionUser.classNum + "반 " + currentSessionUser.name;
+            var compositeEvaluator = "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name;
             sendToGoogleDatabase('team', [compositeEvaluator, target, score, reason, new Date().toLocaleTimeString()]);
             alert('동료 평가가 정상 제출되었습니다!'); exitSubPage();
         }
@@ -798,11 +805,12 @@
             link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        // 🎯 [핵심 연산 복구] 5열 데이터 구조에 맞게 반 격리 연산 완벽 수행
+        // 🎯 [교정 및 중복보정 추가] 최신 1건만 반영하여 반 격리 연산 및 동명이인 완벽 제어
         function compileAveragesByEvaluatorClass() {
             var rawScores = { seller: {}, buyer: {}, team: {} };
+            var deduplicated = { seller: {}, buyer: {}, team: {} };
 
-            // 1. 판매자 평가 파싱
+            // 1. 판매자 평가 파싱 및 중복제거 (최신 평가만)
             globalCloudDatabase.seller.forEach(function(r){
                 var evaluatorText = r[2] ? r[2].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -812,12 +820,18 @@
                 var scoreStr = r[4];
                 if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
 
-                var key = evalClass + "_" + targetName;
+                // 중복 키: 평가자_피평가자
+                var dupKey = evaluatorText + "_" + targetName;
+                deduplicated.seller[dupKey] = { evalClass: evalClass, targetName: targetName, score: scoreMap[scoreStr] };
+            });
+            Object.keys(deduplicated.seller).forEach(function(k) {
+                var item = deduplicated.seller[k];
+                var key = item.evalClass + "_" + item.targetName;
                 if(!rawScores.seller[key]) rawScores.seller[key] = [];
-                rawScores.seller[key].push(scoreMap[scoreStr]);
+                rawScores.seller[key].push(item.score);
             });
 
-            // 2. 구매자 평가 파싱 ("1학년 6반 김서우" 형태의 텍스트에서 완벽 분석)
+            // 2. 구매자 평가 파싱 및 중복제거 (최신 평가만)
             globalCloudDatabase.buyer.forEach(function(r){
                 var evaluatorText = r[1] ? r[1].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -827,12 +841,17 @@
                 var scoreStr = r[3];
                 if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
 
-                var key = evalClass + "_" + targetName;
+                var dupKey = evaluatorText + "_" + targetName;
+                deduplicated.buyer[dupKey] = { evalClass: evalClass, targetName: targetName, score: scoreMap[scoreStr] };
+            });
+            Object.keys(deduplicated.buyer).forEach(function(k) {
+                var item = deduplicated.buyer[k];
+                var key = item.evalClass + "_" + item.targetName;
                 if(!rawScores.buyer[key]) rawScores.buyer[key] = [];
-                rawScores.buyer[key].push(scoreMap[scoreStr]);
+                rawScores.buyer[key].push(item.score);
             });
 
-            // 3. 동료 평가 파싱
+            // 3. 동료 평가 파싱 및 중복제거 (최신 평가만)
             globalCloudDatabase.team.forEach(function(r){
                 var evaluatorText = r[1] ? r[1].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -842,9 +861,14 @@
                 var scoreStr = r[3];
                 if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
 
-                var key = evalClass + "_" + targetName;
+                var dupKey = evaluatorText + "_" + targetName;
+                deduplicated.team[dupKey] = { evalClass: evalClass, targetName: targetName, score: scoreMap[scoreStr] };
+            });
+            Object.keys(deduplicated.team).forEach(function(k) {
+                var item = deduplicated.team[k];
+                var key = item.evalClass + "_" + item.targetName;
                 if(!rawScores.team[key]) rawScores.team[key] = [];
-                rawScores.team[key].push(scoreMap[scoreStr]);
+                rawScores.team[key].push(item.score);
             });
 
             var finalStats = { seller: {}, buyer: {}, team: {} };
@@ -894,7 +918,6 @@
             }
             if(!hasAccount) accountTbody.innerHTML = '<tr><td colspan="13" style="color:#aaa; padding:20px;">가입 명부가 비어 있습니다.</td></tr>';
 
-            // 🎯 리포트 렌더링 호출 (v38 기반 완벽 복구본 매칭)
             renderOriginalSellerReportView('groupedSellerView', globalCloudDatabase.seller, activeAccountClass, stats.seller);
             renderIsolatedReportView('groupedBuyerView', globalCloudDatabase.buyer, activeAccountClass, 2, stats.buyer);
             renderIsolatedReportView('groupedTeamView', globalCloudDatabase.team, activeAccountClass, 3, stats.team);
@@ -906,7 +929,6 @@
             }
         }
 
-        // 1번 리포트(구매자 태도)용 원본 복구본 뷰어
         function renderOriginalSellerReportView(viewId, records, classNum, modeStatObj) {
             var container = document.getElementById(viewId); container.innerHTML = '';
             var groups = {}; var hasData = false;
@@ -921,6 +943,7 @@
             }
             for(var targetName in groups) {
                 hasData = true; var rawList = groups[targetName]; var uniqueUserCheck = {}; var filteredList = [];
+                // 최신 평가 순서대로 누적해 중복 차단
                 for(var m = rawList.length - 1; m >= 0; m--) {
                     var item = rawList[m]; var evalKey = item[2] + "_" + item[0];
                     if(!uniqueUserCheck[evalKey]) { uniqueUserCheck[evalKey] = true; filteredList.unshift(item); }
@@ -941,7 +964,6 @@
             if(!hasData) container.innerHTML = '<p style="color:#aaa; text-align:center; padding:15px;">해당 반의 데이터가 비어 있습니다.</p>';
         }
 
-        // 2번 및 3번용 리포트 화면 연동 로직
         function renderIsolatedReportView(viewId, records, classNum, mode, modeStatObj) {
             var container = document.getElementById(viewId);
             container.innerHTML = '';
@@ -968,6 +990,14 @@
                 hasData = true;
                 var list = studentGroups[targetName];
                 
+                // 최신 평가만 바인딩되도록 필터링
+                var userCheck = {}; var cleanList = [];
+                for(var m = list.length - 1; m >= 0; m--) {
+                    var item = list[m];
+                    var evalKey = item[1];
+                    if(!userCheck[evalKey]) { userCheck[evalKey] = true; cleanList.unshift(item); }
+                }
+
                 var sKey = classNum + "_" + targetName;
                 var stat = modeStatObj[sKey];
                 var summaryText = "⚠️ 해당 반 친구들이 평가한 기록이 존재하지 않거나 연산 대기 중입니다.";
@@ -980,8 +1010,8 @@
                            '<p style="font-size:0.85rem; color:#4a5568; font-weight:bold; margin-bottom:8px; background:#edf2f7; padding:6px; border-radius:4px;">' + summaryText + '</p>' +
                            '<div class="table-wrapper"><table><tbody>';
 
-                for(var k=0; k<list.length; k++) {
-                    var item = list[k]; html += '<tr>';
+                for(var k=0; k<cleanList.length; k++) {
+                    var item = cleanList[k]; html += '<tr>';
                     if(mode === 2) {
                         html += '<td style="width:15%;">부스: ' + item[0] + '</td><td>평가자(구매자): ' + item[1] + '</td><td style="font-weight:bold; color:purple;">설명 발표: ' + item[3] + '</td><td style="color:#aaa;">' + item[4] + '</td>';
                     } else if(mode === 3) {
