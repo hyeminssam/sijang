@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v44</title>
+    <title>지식시장 수행평가 종합 시스템 v45</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -131,7 +131,7 @@
                     <label>번호</label>
                     <select id="loginNumber" required>
                         <option value="">선택(번)</option>
-                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
+                        <option value="1">1번</option><option value="2">2반</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
                         <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
                         <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
                         <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
@@ -435,7 +435,7 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v44
+                        JAVASCRIPT CORE ENGINE v45
          ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwUGraJnr3KF1Fpob9kR7y6e6nS_s10R9WO5ti5y1VrBz7VutZ9mNCbLboLomA9RzwbQ/exec";
@@ -664,7 +664,6 @@
         function handleLogout() { switchPage('pageLogin'); }
         function exitSubPage() { switchPage('pageMenu'); }
 
-        // 🎯 [교정] 판매자 데이터 전송 시 1학년 X반 포맷 및 순서 완벽 고정
         function submitSellerEval(event) {
             event.preventDefault();
             var round = document.getElementById('sellerRound').value;
@@ -675,7 +674,6 @@
                     var score = document.querySelector("input[name='buyerAttitude" + i + "']:checked").value;
                     var classText = "1학년 " + currentSessionUser.classNum + "반";
                     var compositeEvaluator = "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name;
-                    // 기존 데이터 순서: [회차, 평가반, evaluator, 대상자, 평정, 시간]
                     sendToGoogleDatabase('seller', [round, classText, compositeEvaluator, name, score, new Date().toLocaleTimeString()]);
                     hasSubmitted = true;
                 }
@@ -701,13 +699,16 @@
             exitSubPage();
         }
 
+        // 🎯 [v45 교정] 동료평가 기존 6열 포맷 정밀 원상복구 및 주입
         function submitTeamEval(event) {
             event.preventDefault();
             var target = document.getElementById('teamTargetName').value.trim();
             var score = document.querySelector("input[name='teamScore']:checked").value;
             var reason = document.getElementById('teamReason').value.trim();
+            var classText = "1학년 " + currentSessionUser.classNum + "반";
             var compositeEvaluator = "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name;
-            sendToGoogleDatabase('team', [compositeEvaluator, target, score, reason, new Date().toLocaleTimeString()]);
+            // 원래 6열 구조: [대상반, evaluator, 대상조원, 기여도, 사유, 시간] 순서 매칭 사수
+            sendToGoogleDatabase('team', [classText, compositeEvaluator, target, score, reason, new Date().toLocaleTimeString()]);
             alert('동료 평가가 정상 제출되었습니다!'); exitSubPage();
         }
 
@@ -805,12 +806,12 @@
             link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        // 🎯 [교정 및 중복보정 추가] 최신 1건만 반영하여 반 격리 연산 및 동명이인 완벽 제어
+        // 🎯 [중복보정 완전 탑재] 1학년 X반 포맷 기반 최신 1건만 최종 통계에 산입
         function compileAveragesByEvaluatorClass() {
             var rawScores = { seller: {}, buyer: {}, team: {} };
             var deduplicated = { seller: {}, buyer: {}, team: {} };
 
-            // 1. 판매자 평가 파싱 및 중복제거 (최신 평가만)
+            // 1. 판매자 평가 파싱 및 중복제거
             globalCloudDatabase.seller.forEach(function(r){
                 var evaluatorText = r[2] ? r[2].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -820,7 +821,6 @@
                 var scoreStr = r[4];
                 if(isNaN(evalClass) || !targetName || !scoreMap[scoreStr]) return;
 
-                // 중복 키: 평가자_피평가자
                 var dupKey = evaluatorText + "_" + targetName;
                 deduplicated.seller[dupKey] = { evalClass: evalClass, targetName: targetName, score: scoreMap[scoreStr] };
             });
@@ -831,7 +831,7 @@
                 rawScores.seller[key].push(item.score);
             });
 
-            // 2. 구매자 평가 파싱 및 중복제거 (최신 평가만)
+            // 2. 구매자 평가 파싱 및 중복제거
             globalCloudDatabase.buyer.forEach(function(r){
                 var evaluatorText = r[1] ? r[1].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -851,7 +851,7 @@
                 rawScores.buyer[key].push(item.score);
             });
 
-            // 3. 동료 평가 파싱 및 중복제거 (최신 평가만)
+            // 3. 동료 평가 파싱 및 중복제거
             globalCloudDatabase.team.forEach(function(r){
                 var evaluatorText = r[1] ? r[1].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -943,7 +943,6 @@
             }
             for(var targetName in groups) {
                 hasData = true; var rawList = groups[targetName]; var uniqueUserCheck = {}; var filteredList = [];
-                // 최신 평가 순서대로 누적해 중복 차단
                 for(var m = rawList.length - 1; m >= 0; m--) {
                     var item = rawList[m]; var evalKey = item[2] + "_" + item[0];
                     if(!uniqueUserCheck[evalKey]) { uniqueUserCheck[evalKey] = true; filteredList.unshift(item); }
@@ -990,7 +989,6 @@
                 hasData = true;
                 var list = studentGroups[targetName];
                 
-                // 최신 평가만 바인딩되도록 필터링
                 var userCheck = {}; var cleanList = [];
                 for(var m = list.length - 1; m >= 0; m--) {
                     var item = list[m];
