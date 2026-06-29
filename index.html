@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v45</title>
+    <title>지식시장 수행평가 종합 시스템 v46</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -131,7 +131,7 @@
                     <label>번호</label>
                     <select id="loginNumber" required>
                         <option value="">선택(번)</option>
-                        <option value="1">1번</option><option value="2">2반</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
+                        <option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4반</option><option value="5">5번</option>
                         <option value="6">6번</option><option value="7">7번</option><option value="8">8번</option><option value="9">9번</option><option value="10">10번</option>
                         <option value="11">11번</option><option value="12">12번</option><option value="13">13번</option><option value="14">14번</option><option value="15">15번</option>
                         <option value="16">16번</option><option value="17">17번</option><option value="18">18번</option><option value="19">19번</option><option value="20">20번</option>
@@ -343,6 +343,15 @@
 
                 <label style="margin-top:20px; display:block; text-align: left; font-weight: bold; font-size:0.9rem;">💬 과목 담당 교사 종합 피드백 코멘트:</label>
                 <div id="feedbackDisplayValue" style="background:#f7fafc; padding:12px; border-radius:8px; text-align: left; border-left: 4px solid var(--secondary-color); margin-top: 5px; font-size:0.9rem; line-height:1.5;">-</div>
+                
+                <!-- 🎯 [새로 추가된 영역] 수업 후 느낀점 최소 300자 작성 패널 -->
+                <div style="margin-top: 25px; border-top: 2px dashed #cbd5e1; padding-top: 20px; text-align: left;">
+                    <label style="font-weight: bold; font-size:0.95rem; color: #2b6cb0;">✍️ [필수 제출] 과학 수업 후 느낀점 성찰 기록</label>
+                    <p style="font-size:0.8rem; color: #718096; margin-bottom: 8px;">이번 프로젝트와 과학 수업을 진행하며 느낀 점, 배운 점, 아쉬운 점 등을 솔직하게 기록해 주세요.</p>
+                    <textarea id="lessonReviewText" oninput="checkReviewLength()" style="min-height: 140px; line-height: 1.5;" placeholder="여기에 최소 300자 이상 자유롭게 작성하세요. (300자 미만 작성 시 제출이 불가능합니다.)"></textarea>
+                    <div id="reviewCharCount" style="font-size: 0.85rem; font-weight: bold; color: #c53030; text-align: right; margin-top: 5px;">현재: 0자 / 300자 이상 필수</div>
+                    <button class="btn-block btn-submit" id="btnSubmitReview" style="background-color: #4cd137; color: white; margin-top: 10px;" onclick="submitLessonReviewData()">느낀점 기록 최종 제출하기</button>
+                </div>
             </div>
             <button class="btn-block btn-back" onclick="exitSubPage()">메뉴판으로 가기</button>
         </div>
@@ -435,7 +444,7 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v45
+                        JAVASCRIPT CORE ENGINE v46
          ============================================================= -->
     <script>
         var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwUGraJnr3KF1Fpob9kR7y6e6nS_s10R9WO5ti5y1VrBz7VutZ9mNCbLboLomA9RzwbQ/exec";
@@ -657,12 +666,44 @@
 
                 if(document.getElementById('scoreDisplayValue')) document.getElementById('scoreDisplayValue').innerText = totalScore + " 점";
                 if(document.getElementById('feedbackDisplayValue')) document.getElementById('feedbackDisplayValue').innerText = teacherFeedback || "등록된 종합 피드백 코멘트가 없습니다.";
+                
+                // 로드 시 느낀점 리셋
+                document.getElementById('lessonReviewText').value = '';
+                checkReviewLength();
             }
             switchPage("page" + menuType.charAt(0).toUpperCase() + menuType.slice(1));
         }
 
         function handleLogout() { switchPage('pageLogin'); }
         function exitSubPage() { switchPage('pageMenu'); }
+
+        // 🎯 [느낀점 입력 검증 스크립트]
+        function checkReviewLength() {
+            var txt = document.getElementById('lessonReviewText').value;
+            var len = txt.length;
+            var cntEl = document.getElementById('reviewCharCount');
+            if(len >= 300) {
+                cntEl.innerText = "조건 충족: " + len + "자 작성 완료";
+                cntEl.style.color = "green";
+            } else {
+                cntEl.innerText = "현재: " + len + "자 / 300자 이상 필수 (" + (300 - len) + "자 부족)";
+                cntEl.style.color = "#c53030";
+            }
+        }
+
+        function submitLessonReviewData() {
+            var txt = document.getElementById('lessonReviewText').value.trim();
+            if(txt.length < 300) {
+                alert('❌ 느낀점이 아직 300자 미만입니다.\n수업을 성찰하며 조금 더 정성껏 채워주세요! (현재 ' + txt.length + '자)');
+                return;
+            }
+            
+            // 기존 데이터 전송 양식(accounts 업데이트 연동 전용 라벨 'student_review')
+            // 현재 로그인 유저의 반, 번호 정보와 함께 실어 전송
+            sendToGoogleDatabase('student_review', [currentSessionUser.classNum, currentSessionUser.number, currentSessionUser.name, txt, new Date().toLocaleTimeString()]);
+            alert('🎉 과학 수업 후 느낀점이 구글 시트로 안전하게 최종 제출되었습니다!');
+            exitSubPage();
+        }
 
         function submitSellerEval(event) {
             event.preventDefault();
@@ -699,17 +740,18 @@
             exitSubPage();
         }
 
-        // 🎯 [v45 교정] 동료평가 기존 6열 포맷 정밀 원상복구 및 주입
         function submitTeamEval(event) {
             event.preventDefault();
             var target = document.getElementById('teamTargetName').value.trim();
             var score = document.querySelector("input[name='teamScore']:checked").value;
             var reason = document.getElementById('teamReason').value.trim();
+            
             var classText = "1학년 " + currentSessionUser.classNum + "반";
             var compositeEvaluator = "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name;
-            // 원래 6열 구조: [대상반, evaluator, 대상조원, 기여도, 사유, 시간] 순서 매칭 사수
+            
             sendToGoogleDatabase('team', [classText, compositeEvaluator, target, score, reason, new Date().toLocaleTimeString()]);
-            alert('동료 평가가 정상 제출되었습니다!'); exitSubPage();
+            alert('동료 평가가 정상 제출되었습니다!'); 
+            exitSubPage();
         }
 
         function submitSelfEval(event) {
@@ -806,12 +848,10 @@
             link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        // 🎯 [중복보정 완전 탑재] 1학년 X반 포맷 기반 최신 1건만 최종 통계에 산입
         function compileAveragesByEvaluatorClass() {
             var rawScores = { seller: {}, buyer: {}, team: {} };
             var deduplicated = { seller: {}, buyer: {}, team: {} };
 
-            // 1. 판매자 평가 파싱 및 중복제거
             globalCloudDatabase.seller.forEach(function(r){
                 var evaluatorText = r[2] ? r[2].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -831,7 +871,6 @@
                 rawScores.seller[key].push(item.score);
             });
 
-            // 2. 구매자 평가 파싱 및 중복제거
             globalCloudDatabase.buyer.forEach(function(r){
                 var evaluatorText = r[1] ? r[1].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
@@ -851,7 +890,6 @@
                 rawScores.buyer[key].push(item.score);
             });
 
-            // 3. 동료 평가 파싱 및 중복제거
             globalCloudDatabase.team.forEach(function(r){
                 var evaluatorText = r[1] ? r[1].toString() : "";
                 var match = evaluatorText.match(/(\d+)반/);
