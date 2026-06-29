@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지식시장 수행평가 종합 시스템 v46</title>
+    <title>지식시장 수행평가 종합 시스템 v47</title>
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -344,12 +344,12 @@
                 <label style="margin-top:20px; display:block; text-align: left; font-weight: bold; font-size:0.9rem;">💬 과목 담당 교사 종합 피드백 코멘트:</label>
                 <div id="feedbackDisplayValue" style="background:#f7fafc; padding:12px; border-radius:8px; text-align: left; border-left: 4px solid var(--secondary-color); margin-top: 5px; font-size:0.9rem; line-height:1.5;">-</div>
                 
-                <!-- 🎯 [새로 추가된 영역] 수업 후 느낀점 최소 300자 작성 패널 -->
+                <!-- 🎯 [교정] 글자수 조건 200자로 완화 -->
                 <div style="margin-top: 25px; border-top: 2px dashed #cbd5e1; padding-top: 20px; text-align: left;">
                     <label style="font-weight: bold; font-size:0.95rem; color: #2b6cb0;">✍️ [필수 제출] 과학 수업 후 느낀점 성찰 기록</label>
                     <p style="font-size:0.8rem; color: #718096; margin-bottom: 8px;">이번 프로젝트와 과학 수업을 진행하며 느낀 점, 배운 점, 아쉬운 점 등을 솔직하게 기록해 주세요.</p>
-                    <textarea id="lessonReviewText" oninput="checkReviewLength()" style="min-height: 140px; line-height: 1.5;" placeholder="여기에 최소 300자 이상 자유롭게 작성하세요. (300자 미만 작성 시 제출이 불가능합니다.)"></textarea>
-                    <div id="reviewCharCount" style="font-size: 0.85rem; font-weight: bold; color: #c53030; text-align: right; margin-top: 5px;">현재: 0자 / 300자 이상 필수</div>
+                    <textarea id="lessonReviewText" oninput="checkReviewLength()" style="min-height: 140px; line-height: 1.5;" placeholder="여기에 최소 200자 이상 자유롭게 작성하세요. (200자 미만 작성 시 제출이 불가능합니다.)"></textarea>
+                    <div id="reviewCharCount" style="font-size: 0.85rem; font-weight: bold; color: #c53030; text-align: right; margin-top: 5px;">현재: 0자 / 200자 이상 필수</div>
                     <button class="btn-block btn-submit" id="btnSubmitReview" style="background-color: #4cd137; color: white; margin-top: 10px;" onclick="submitLessonReviewData()">느낀점 기록 최종 제출하기</button>
                 </div>
             </div>
@@ -444,10 +444,10 @@
     </div>
 
     <!-- =============================================================
-                        JAVASCRIPT CORE ENGINE v46
+                        JAVASCRIPT CORE ENGINE v47
          ============================================================= -->
     <script>
-        var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx4_xiv_JJXL-4y9fM0SenH6Rswch5UlcZQwPGc59-N78et_rNLAyQIOhEDJmCub1e_7g/exec";
+        var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxi_T5JG_WRKkvyqRmpWXXgHz6FGIzoaXR915-HmVZlVVs-z7eraRk0FKzp2iF689qRFA/exec";
 
         var currentSessionUser = null;
         var menuPermissions = { seller: true, buyer: true, team: true, self: true, score: true };
@@ -667,7 +667,6 @@
                 if(document.getElementById('scoreDisplayValue')) document.getElementById('scoreDisplayValue').innerText = totalScore + " 점";
                 if(document.getElementById('feedbackDisplayValue')) document.getElementById('feedbackDisplayValue').innerText = teacherFeedback || "등록된 종합 피드백 코멘트가 없습니다.";
                 
-                // 로드 시 느낀점 리셋
                 document.getElementById('lessonReviewText').value = '';
                 checkReviewLength();
             }
@@ -677,29 +676,26 @@
         function handleLogout() { switchPage('pageLogin'); }
         function exitSubPage() { switchPage('pageMenu'); }
 
-        // 🎯 [느낀점 입력 검증 스크립트]
+        // 🎯 [교정] 느낀점 기준 200자로 축소
         function checkReviewLength() {
             var txt = document.getElementById('lessonReviewText').value;
             var len = txt.length;
             var cntEl = document.getElementById('reviewCharCount');
-            if(len >= 300) {
+            if(len >= 200) {
                 cntEl.innerText = "조건 충족: " + len + "자 작성 완료";
                 cntEl.style.color = "green";
             } else {
-                cntEl.innerText = "현재: " + len + "자 / 300자 이상 필수 (" + (300 - len) + "자 부족)";
+                cntEl.innerText = "현재: " + len + "자 / 200자 이상 필수 (" + (200 - len) + "자 부족)";
                 cntEl.style.color = "#c53030";
             }
         }
 
         function submitLessonReviewData() {
             var txt = document.getElementById('lessonReviewText').value.trim();
-            if(txt.length < 300) {
-                alert('❌ 느낀점이 아직 300자 미만입니다.\n수업을 성찰하며 조금 더 정성껏 채워주세요! (현재 ' + txt.length + '자)');
+            if(txt.length < 200) {
+                alert('❌ 느낀점이 아직 200자 미만입니다.\n수업을 성찰하며 조금 더 정성껏 채워주세요! (현재 ' + txt.length + '자)');
                 return;
             }
-            
-            // 기존 데이터 전송 양식(accounts 업데이트 연동 전용 라벨 'student_review')
-            // 현재 로그인 유저의 반, 번호 정보와 함께 실어 전송
             sendToGoogleDatabase('student_review', [currentSessionUser.classNum, currentSessionUser.number, currentSessionUser.name, txt, new Date().toLocaleTimeString()]);
             alert('🎉 과학 수업 후 느낀점이 구글 시트로 안전하게 최종 제출되었습니다!');
             exitSubPage();
@@ -745,7 +741,6 @@
             var target = document.getElementById('teamTargetName').value.trim();
             var score = document.querySelector("input[name='teamScore']:checked").value;
             var reason = document.getElementById('teamReason').value.trim();
-            
             var classText = "1학년 " + currentSessionUser.classNum + "반";
             var compositeEvaluator = "1학년 " + currentSessionUser.classNum + "반 " + currentSessionUser.name;
             
